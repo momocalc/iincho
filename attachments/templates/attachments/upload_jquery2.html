@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="{{ STATIC_URL }}/static/file_upload/js/vendor/jquery.ui.widget.js"></script>
+    <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+    <script src="{{ STATIC_URL }}/static/file_upload/js/jquery.iframe-transport.js"></script>
+    <!-- The basic File Upload plugin -->
+    <script src="{{ STATIC_URL }}/static/file_upload/js/jquery.fileupload.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_URL }}/static/file_upload/css/jquery.fileupload.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <title></title>
+
+    <script>
+        /*jslint unparam: true */
+        /*global window, $ */
+        $(function () {
+            'use strict';
+            // Change this to the location of your server-side upload handler:
+            var url = '{% url 'upload_file_jq2' %}';
+
+            $('#fileupload').fileupload({
+                timeout: 20000,
+                url: url,
+                dataType: 'json',
+                add: function(e, data){
+                    var uploadErrors = [];
+                    var acceptFileTypes = /^((image\/(gif|jpe?g|png))|(application\/(pdf|x-tex|postscript))|(text\/(tab-separated-values|plain|xml)))$/i;
+                    if(data.originalFiles[0]['type'].length && !acceptFileTypes.test(data.originalFiles[0]['type'])) {
+                        uploadErrors.push('Not an accepted file type');
+                    }
+                    if(data.originalFiles[0]['size'].length && data.originalFiles[0]['size'] > 5000000) {
+                        uploadErrors.push('Filesize is too big');
+                    }
+                    if(uploadErrors.length > 0) {
+                        alert(uploadErrors.join("\n"));
+                    } else {
+                        data.submit();
+                    }
+                },
+                done: function (e, data) {
+                    console.log('success');
+                    $.each(data.result.files, function (index, file) {
+                        alert("spam");
+{#                      $('<p/>').text(file.name).appendTo('#files');#}
+                    });
+                },
+                progressall: function (e, data) {
+                    console.log(data.loaded / data.total * 100);
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                },
+                fail: function(jqXHR, status, err) {
+                    console.log('fail');
+                }
+            }).prop('disabled', !$.support.fileInput)
+            .parent().addClass($.support.fileInput ? undefined : 'disabled')
+        });
+    </script>
+</head>
+<body>
+     <!-- The fileinput-button span is used to style the file input field as button -->
+
+<script>
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    crossDomain: false, // obviates need for sameOrigin test
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type)) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{# provide pagination of bootstrap #}
+{% macro pagination(link_count = 5, param_str = '') -%}
+
+{% set params = (request.GET | remove_param_str('page')).urlencode() %}
+    {% set params = '&' + params if params else '' %}
+{# 表示範囲設定 #}
+{% set offset = link_count // 2 %}
+{% set first_num = [1, page_obj.number - offset] | max %}
+{% set last_num = first_num + link_count - 1 %}
+{% set last_num = [last_num, paginator.num_pages] | min %}
+
+{% set first_num = last_num - link_count + 1  %}
+{% set first_num = [1, first_num] | max %}
+
+<nav>
+    <ul class="pagination">
+
+        {% if first_num > 1 %}
+        <li>
+            <a href="?page={{ first_num - 1 }}{{ params }}" aria-label="Previous">
+
+        {% else %}
+        <li class="disabled">
+            <a href="#" aria-label="Previous">
+
+        {% endif %}
+            <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        {% for item in range(first_num,last_num + 1) %}
+            <li {% if item == page_obj.number %} class="active" {% endif %} >
+                <a href="?page={{ item }}{{ params }}">{{ item }}</a>
+            </li>
+        {% endfor %}
+
+        {% if paginator.num_pages <= last_num %}
+            <li class="disabled">
+            <a href="#" aria-label="Previous">
+        {% else %}
+            <li>
+            <a href="?page={{ last_num + 1 }}{{ params }}" aria-label="Next">
+        {% endif %}
+            <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endmacro %}
+
+{% macro user_icon_url(file_name = None) -%}
+    {% if file_name %}
+        {{ MEDIA_URL }}accounts/images/icon/{{ file_name }}
+    {% else %}
+        {{ static("accounts/images/no-icon.png") }}
+    {% endif %}
+{% endmacro %}
+
+{% macro confirm_modal(modal_id="confirm_modal", title="確認", btn_class="btn-default") -%}
+<div class="modal fade" tabindex="-1" role="dialog" id="{{ modal_id }}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{{ title }}</h4>
+      </div>
+      <div class="modal-body">
+        <p class="modal-message"></p>
+      </div>
+      <div class="modal-footer">
+         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+         <button type="button" class="modal-submit btn {{ btn_class }}">OK</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{% endmacro %}

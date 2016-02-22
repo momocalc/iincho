@@ -1,0 +1,158 @@
+{% extends "base.jinja2" %}
+{% import "basic_macros.jinja2" as b_macro with context %}
+{% import "categories/macros.jinja2" as c_macro %}
+
+{% block head %}
+    <script src="{{ static('markdown-editor/js/markdown-it.js') }}" xmlns="http://www.w3.org/1999/html"></script>
+    <script src="{{ static("markdown-editor/js/markdown-it-footnote.js") }}"></script>
+    <script src="{{ static("markdown-editor/js/highlight.pack.js") }}"></script>
+    <script src="{{ static("markdown-editor/js/emojify.js") }}"></script>
+    <link rel="stylesheet" href="{{ static("markdown-editor/css/default.css") }}">
+    <link rel="stylesheet" href="{{ static("articles/article.css") }}">
+{% endblock %}
+
+{% block content %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <div class="article_header">
+        <div class="category_list">
+            {{ c_macro.make_category_breadcrumb(article.category.name) }}
+        </div>
+
+        <div class="pull-right">
+           <span>
+               <img class="owner_icon" src="{{ bas_macro.user_icon_url(article.owner.profile.photo) }}" alt="owner-photo" />
+               <a href="{{ url('articles:owners_articles', article.owner.id)  }}">
+               {{ article.owner.username }}</a> が
+           </span>
+            <span>{{ article.created | datetimeformat('%Y/%m/%d') }}に投稿</span>
+        </div>
+        <h1 id="detail_title">
+            {{ article.title }}
+            {% if article.owner.id == user.id or user.is_superuser %}
+                <a href="{{ url('articles:update', article.id) }}" class="btn btn-md btn-default">編集</a>
+                <button type="button" class="btn btn-default" onclick="delete_article();" data-toggle="modal" data-target="#delete_article_confirm">削除</button>
+
+            {% endif %}
+        </h1>
+        <div class="article_tags">
+            <ul>
+            {% for tag in tags %}
+                <li class="li_tag"><a href="{{ url('articles:list') }}?tag={{ tag.name | iriencode }}">{{ tag.name }}</a></li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="article_body">
+        <div id="raw_body" style="display: none;">{{ article.body }}</div>
+        <div id="out" class="editor-textarea"></div>
+    </div>
+
+    {{ b_macro.confirm_modal(modal_id='delete_article_confirm', btn_class="btn-danger") }}
+    <form id="delete_form" action="{{ url('articles:delete', article.id) }}" method="post">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    </form>
+
+    {# コメント #}
+    <div class="comments">
+        <div>
+            <h2><span class="glyphicon glyphicon-comment" style="margin-right:5px"></span>comments</h2>
+        </div>
+        {% for comment in comments %}
+            <div class="media">
+                <div class="media-left">
+                    <img class="user_icon" src="{{ b_macro.user_icon_url(comment.user.profile.photo) }}" alt="comment-user-photo" />
+                </div>
+                <div class="media-body">
+                    <div class="comment_status">
+                        <a href="{{ url('articles:owners_articles', comment.user.id) }}">{{ comment.user.username }}</a>
+                        <p class="pull-right">{{ comment.created | datetimeformat() }}
+                            <span>
+                                {% if comment.user.id == user.id or user.is_superuser %}
+                                    <a href="#" onclick="delete_comment(this)" data-label="{{ comment.id }}"
+                                         data-toggle="modal" data-target="#delete_comment_confirm">削除</a>
+                                {% endif %}
+                            </span>
+                        <p>
+                    </div>
+                    <div class="comment_body md_comment">{{ comment.body }}</div>
+                </div>
+            </div>
+        {% endfor %}
+        {# コメント投稿 #}
+        <div class="media">
+            <div class="media-left">
+                <img class="user_icon" src="{{ b_macro.user_icon_url(user.profile.photo) }}" alt="comment-user-photo" />
+            </div>
+            <div class="media-body">
+                <div class="comment_status">
+                    <h4 class="media-heading">コメントを投稿</h4>
+                </div>
+                <div class="comment_body">
+                    <form method="post" action="">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        {{ form.body.errors }}
+                        <div>
+                            {{ form.body }}
+                        </div>
+                        <input type="submit" class="btn btn-md btn-primary pull-right" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ b_macro.confirm_modal(modal_id='delete_comment_confirm', btn_class="btn-danger") }}
+    <form id="del_comment_form" method="post" action="{{ url("articles:comment_delete", article.id) }}">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <input type="hidden" id="del_comment_id" name="comment_id" />
+    </form>
+{% endblock %}
+
+{% block body_script %}
+    <script src="{{ static('articles/markdown.js') }}"></script>
+    <script>
+        emojify.setConfig({img_dir:'{{  static('markdown-editor/emoji') }}'});
+        $(function(){
+            var md = new markdownRender();
+            var out = document.getElementById('out');
+            out.innerHTML = md.render(document.getElementById('raw_body').innerText);
+            emojify.run(out);
+
+            $('.md_comment').each(function(){
+                var raw = $(this).text();
+                var md_txt = md.render(raw);
+                $(this).html(md_txt);
+                emojify.run($(this)[0]);
+            });
+
+            //モーダル設定
+            $('#delete_comment_confirm').find('.modal-message').text('コメントを削除しますか？');
+
+        });
+
+        // 記事削除
+        function delete_article(){
+            var confirm = $('#delete_article_confirm')
+            confirm.find('.modal-message').text('投稿: {{ article.title }} を削除しますか？');
+            confirm.find('.modal-submit').click(function(){
+                $('#delete_form').submit();
+            });
+        }
+        // コメント削除
+        function delete_comment(a){
+            $('#del_comment_id').val($(a).attr("data-label"));
+            $('#delete_comment_confirm').find('.modal-submit').click(function(){
+                $('#del_comment_form').submit();
+            });
+        }
+
+    </script>
+
+{% endblock %}
+

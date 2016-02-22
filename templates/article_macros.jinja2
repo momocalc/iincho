@@ -1,0 +1,41 @@
+{% import "basic_macros.jinja2" as bas_macro with context %}
+{% macro article_list() -%}
+
+<div class="articles">
+    {% for article in object_list %}
+        <div class="media article_media">
+            <div class="media-left">
+                <img class="owner_icon" src="{{ bas_macro.user_icon_url(article.owner.profile.photo) }}" alt="owner-photo" />
+            </div>
+            <div class="media-body">
+                <div class="article_status">
+                    <div>
+                        <a href="{{ url('articles:owners_articles', article.owner.id) }}">{{ article.owner.username }}</a>
+                        {{ article.created | datetimeformat('%Y/%m/%d') }}
+                    </div>
+                    <div class="article_category">
+                        {% set c_link = '' %}
+                        <ul>
+                        {% for c_name in article.category.name.split('/') if c_name %}
+                            {% set c_link = c_link + c_name + '/' %}
+                            <li class="li_category"><a href="{{ url('index') }}?path=/{{ c_link | iriencode}}">{{ c_name }}</a></li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+
+                </div>
+                <h3 class="media-heading">
+                    <a href=" {{ url('articles:detail',article.id) }}">{{ article.title }}</a>
+                </h3>
+                <div class="article_tags">
+                    {% for tag in article.tags %}
+                        <li class="li_tag"><a href="{{ url('articles:list') }}?query=%23{{tag.name | iriencode }}">{{ tag.name }}</a></li>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{{ bas_macro.pagination(5) }}
+
+{% endmacro %}

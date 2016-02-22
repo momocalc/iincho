@@ -1,0 +1,183 @@
+{% extends "base.jinja2" %}
+{% import "ajax_macros.jinja2" as ajax_macro %}
+
+{% block head %}
+    <script src="{{ static('markdown-editor/js/markdown-it.js') }}"></script>
+    <script src="{{ static("markdown-editor/js/markdown-it-footnote.js") }}"></script>
+    <script src="{{ static("markdown-editor/js/highlight.pack.js") }}"></script>
+    <script src="{{ static("markdown-editor/js/emojify.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/lib/codemirror.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/overlay.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/xml/xml.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/markdown/markdown.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/gfm/gfm.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/javascript/javascript.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/css/css.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/htmlmixed/htmlmixed.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/lib/util/continuelist.js") }}"></script>
+    <script src="{{ static("markdown-editor/codemirror/addon/searchcursor.js") }}"></script>
+    <script src="{{ static("markdown-editor/js/rawinflate.js") }}"></script>
+    <script src="{{ static("markdown-editor/js/rawdeflate.js") }}"></script>
+    <script src="{{ static("js/string_utils.js") }}"></script>
+    <link rel="stylesheet" href="{{ static("markdown-editor/codemirror/lib/codemirror.css") }}">
+    <link rel="stylesheet" href="{{ static("markdown-editor/css/default.css") }}">
+    <link rel="stylesheet" href="{{ static("articles/article.css") }}">
+    <link rel="stylesheet" href="{{ static("markdown-editor/css/base16-light.css") }}">
+    <script src="{{ static("file_upload/js/vendor/jquery.ui.widget.js") }}"></script>
+    <script src="{{ static("file_upload/js/jquery.iframe-transport.js") }}"></script>
+    <script src="{{ static("file_upload/js/jquery.fileupload.js") }}"></script>
+    <link rel="stylesheet" href="{{ static("file_upload/css/jquery.fileupload.css") }}">
+<style>
+    .container {width:auto;}
+</style>
+{% endblock %}
+
+{% block content %}
+   <div class="main-container">
+    <div class="row">
+        <div class="col-md-6">
+            <form action="" method="post">
+                <div class="errors">
+                    {{ form.non_field_errors() }}
+                </div>
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                <div class="errors">
+                    {{ form.title.errors }}
+                </div>
+                <div class="editor-header">
+                    <div class="input-group input-group-lg">
+                        {{ form.title }}
+                    </div>
+                </div>
+                <div class="errors">
+                    {{ form.body.errors }}
+                </div>
+                <div id="editor_area" class="editor-textarea">
+                    {{ form.body }}
+                </div>
+                <div class="row editor-footer">
+                    <div>
+                        <button class="btn btn-md btn-primary pull-right">投稿</button>
+                    </div>
+                </div>
+            </form>
+            {% if not DEMO %}
+            <div class="uploader">
+                <div>
+                    <span class="fileinput-button">
+                        <img class="upload_icon" src="{{ static('articles/images/up_picture.png') }}" />
+                        <input type="file" id="fileupload" name="file" />
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-6 hidden-sm hidden-xs" style="height:100%">
+            <div class="editor-preview">
+                <div class="editor-preview-header">
+                    <h1 id="title-out"></h1>
+                </div>
+                <div id="out" class="editor-textarea"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_script %}
+    <script>
+        {{ ajax_macro.django_ajax_init() }}
+        emojify.setConfig({img_dir:'{{  static('markdown-editor/emoji') }}'});
+
+        var upload_helper = function(){
+            var imageType = /^image\/(gif|jpe?g|png)$/i;
+            var urlPrefix = 'now uploading... '
+            return {
+                added : function(fileType) {
+                    var isImage = (fileType && imageType.test(fileType));
+                    var prefix = isImage ? '!' : '';
+                    var uniqueStr = getUniqueStr();
+
+                    editor.replaceRange(prefix + '['+ uniqueStr + '](' +  urlPrefix + uniqueStr + ')\n',
+                            CodeMirror.Pos(editor.getCursor().line, editor.getCursor().ch));
+                    return uniqueStr;
+                },
+                uploaded : function(target, fileName, fileUrl){
+                    if(!target) return;
+                    // アップロードpathに置換
+                    var searchCursor = editor.getSearchCursor(target);
+                    if(fileName && searchCursor.findNext()){
+                        searchCursor.replace(fileName);
+                    }
+                    searchCursor = editor.getSearchCursor(urlPrefix + target);
+                    if(fileUrl && searchCursor.findNext()){
+                        searchCursor.replace(fileUrl);
+                    }
+                }
+            };
+        }();
+
+        // file-upload
+        $(function () {
+            'use strict';
+
+            // Change this to the location of your server-side upload handler:
+            var url='';
+            {% if not DEMO %}
+            url = '{{ url('attachments:upload_file_jq') }}';
+            {% endif %}
+            $('#fileupload').fileupload({
+                timeout: 20000,
+                url: url,
+                dataType: 'json',
+                dropZone: $('#editor_area'),
+                drop: function (e, data) {
+                    if(!data.upload_canceled && data.files.length > 3){
+                        data.upload_canceled = true;
+                        alert("一度にアップロード可能なファイルは3つまでです．")
+                    }
+                },
+                add: function(e, data){
+                    if(data.upload_canceled) return;
+
+                    var uploadErrors = [];
+                    var acceptFileTypes = /^((image\/(gif|jpe?g|png))|(application\/(pdf|x-tex|postscript))|(text\/(tab-separated-values|plain|xml)))$/i;
+                    var fileType = data.files[0]['type'];
+
+                    if(!acceptFileTypes.test(fileType)) {
+                        uploadErrors.push(data.files[0].name + ' is not an accepted file type');
+                    }
+                    if(data.files[0]['size'] && data.files[0]['size'] > 5242880) {
+                        uploadErrors.push(data.files[0].name + ' filesize is too big');
+                    }
+                    if(uploadErrors.length > 0) {
+                        alert(uploadErrors.join("\n"));
+                    } else {
+                        data.files[0].unique_id = upload_helper.added(fileType);
+                        data.submit();
+                    }
+                },
+                done: function (e, data) {
+                    if (data.result.status == 'success'){
+                        upload_helper.uploaded(data.files[0].unique_id, data.result.file_name, data.result.file_url);
+                    }else{
+                        if(data.result.messages){
+                            alert(data.result.messages.join("\n"));
+                        }else{
+                            alert('failed upload.');
+                        }
+                    }
+
+                },
+                fail: function(jqXHR, status, err) {
+                    alert('failed upload.');
+                }
+            }).prop('disabled', !$.support.fileInput)
+                    .parent().addClass($.support.fileInput ? undefined : 'disabled')
+        });
+    </script>
+    <script src="{{ static('articles/markdown.js') }}"></script>
+    <script src="{{ static('articles/editor.js') }}"></script>
+
+{% endblock %}

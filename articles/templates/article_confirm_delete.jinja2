@@ -1,0 +1,18 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form action="" method="post">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <h1>削除確認</h1>
+        {{ object.title }}
+        <input type="submit" value="削除" />
+
+    </form>
+{% endblock %}

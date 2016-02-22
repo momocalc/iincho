@@ -1,0 +1,47 @@
+{% macro make_category_tree(current_path=None) -%}
+    [
+
+    {% set current_path = current_path or ' ' %}
+    {%  if category_list %}
+        {% set root = category_list | category_tree %}
+{# ルートは表示しない #}
+        {%  for n in root.children %}
+            {{ make_tree_list(n, current_path) }}
+        {% endfor %}
+    {%  endif %}
+
+    ]
+{% endmacro %}
+
+{% macro make_tree_list(node, current_path) -%}
+    {
+        text: "{{ node.name }}",
+        tags: ['{{ node.count }}'],
+        href: "?path={{ node.encoded_path }}",
+        {% if current_path.startswith(node.path) %}
+            state: {
+                expanded: true
+                {% if current_path == node.path %}
+                    ,selected: true
+                {% endif %}
+            },
+        {% endif %}
+    {% if node.children %}
+        nodes: [
+            {% for c in node.children %}
+                {{ make_tree_list(c, current_path) }}
+            {% endfor %}
+        ],
+    {% endif %}
+    },
+{% endmacro %}
+
+{% macro make_category_breadcrumb(name) -%}
+    <ul class="breadcrumb">
+    {% for node in (name | split_category_path) %}
+        <li>
+            <a href="{{ url('index') }}?path={{ node.encoded_path }}">{{ node.name }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% endmacro %}

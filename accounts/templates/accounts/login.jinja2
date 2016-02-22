@@ -1,0 +1,20 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <h1>ログイン</h1>
+    {% if DEMO %}
+        <div style="margin:20px 0;">
+            <form method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                {{ form|bootstrap }}
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">login</button>
+                </div>
+            </form>
+        </div>
+    {% else %}
+        <div>
+            <a id="a_login" href="{{ url('social:begin','google-oauth2') }}">Login with Google</a>
+        </div>
+    {% endif %}
+{% endblock %}

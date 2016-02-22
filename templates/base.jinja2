@@ -1,0 +1,79 @@
+{% import "basic_macros.jinja2" as bas_macro with context %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Iincho</title>
+    <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ static("css/base.css") }}">
+    <!--&#91;if lt IE 9&#93;>
+    <script src="//cdn.jsdelivr.net/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+    <!&#91;endif&#93;-->
+
+    {%  block head %}
+    {%  endblock %}
+</head>
+<body>
+<nav id="top-nav" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ url('index') }}">Iincho</a>
+        </div>
+
+            <div id="navbar" class="navbar-collapse collapse">
+                {% if user and not user.is_anonymous() %}
+{# action="{{ url('articles:search') }}" #}
+                <form class="navbar-form navbar-left" method="get" action="{{ url('articles:list') }}" >
+                    <div class="input-group">
+                        <span class="input-group-addon" id="header-search" ><span class="glyphicon glyphicon-search" aria-hidden="true"></span></span>
+                        <input type="text" name="query" style="width:300px" placeholder="keywords or c:cateogory or #tag" class="form-control"
+                               aria-describedby="header-search" value="{{ request.GET.get('query')|default('', true) }}" />
+                    </div>
+                </form>
+                {% endif %}
+
+                <ul class="nav navbar-nav navbar-right">
+                    {% if user and not user.is_anonymous() %}
+                        <li><a id="a_new_entry" href="{{ url('articles:create') }}">新規投稿</a></li>
+                        <li id="a_user_menu" class="dropdown" >
+                            <a href="#" data-toggle="dropdown" class="a_icon">
+                               <img src="{{ bas_macro.user_icon_url(user.profile.photo) }}" alt="" class="user_icon">
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="{{ url('articles:owners_articles', user.id) }}">記事一覧</a>
+                                    <a href="{{ url('auth:logout') }}?next=/">ログアウト</a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% elif not DEMO %}
+                        <li>
+                            <a id="a_login" href="{{ url('social:begin','google-oauth2') }}">Login with Google</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div><!--/.navbar-collapse -->
+    </div>
+</nav>
+<div class="container main_contents">
+{% block content %}
+{% endblock %}
+</div>
+{% block body_script %}
+{% endblock %}
+</body>
+</html>

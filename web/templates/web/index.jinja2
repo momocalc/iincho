@@ -1,0 +1,44 @@
+{% extends "base.jinja2" %}
+{% import "categories/macros.jinja2" as catecro with context %}
+{% import "article_macros.jinja2" as articro with context %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-3">
+            <div id="category_tree" class="tree_view" style="margin-top:63px;"></div>
+        </div>
+        <div class="col-md-9">
+            <div class="list_header">
+                {% if path %}
+                    <h2>{{ path }} の投稿一覧</h2>
+                {% else %}
+                    <h2>新着投稿一覧</h2>
+                {% endif %}
+            </div>
+            {{ articro.article_list() }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_script %}
+    <script src="{{ static('js/bootstrap-treeview.js') }}"></script>
+    <script>
+        function getTree() {
+            return {{ catecro.make_category_tree(request.GET.get('path')) }} ;
+        }
+
+        $(function(){
+            $('#category_tree').treeview({
+                data:getTree(),
+                showTags: true,
+                enableLinks: true,
+                levels: 1,
+                expandIcon: 'glyphicon glyphicon-chevron-right',
+                collapseIcon: 'glyphicon glyphicon-chevron-down',
+                onNodeSelected: function(event, node){
+                    window.location.href = node.href
+                }
+            });
+        });
+    </script>
+{% endblock %}
