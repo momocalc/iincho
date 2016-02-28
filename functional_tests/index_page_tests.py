@@ -38,8 +38,8 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
         # ログインリンクをクリック
         login_link.click()
         # googleのログインをする
-        google_id = os.environ.get('test_google_id')
-        google_pw = os.environ.get('test_google_passwd')
+        google_id = os.environ.get('TEST_GOOGLE_ID')
+        google_pw = os.environ.get('TEST_GOOGLE_PASSWD')
         self._login_with_google(google_id, google_pw)
 
         delay = 3
