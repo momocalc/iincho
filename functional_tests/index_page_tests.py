@@ -9,7 +9,7 @@ import os
 
 
 class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
-    fixtures = ['test_users.json', 'test_2articles.json']
+    fixtures = ['test_users.json', 'test_categories.json', 'test_2articles.json']
     def setUp(self):
         self.browser = webdriver.Firefox()
 
