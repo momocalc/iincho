@@ -16,7 +16,7 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-    def test_a_user_login(self):
+    def test_a_user_login_and_visit_index_page(self):
         # トップページにアクセス
         self.browser.get(self.live_server_url)
 
@@ -36,17 +36,6 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
 
         if not self.login():
             self.fail('login failed or took too much time to redirect to Iincho')
-
-    def test_a_logged_in_user_visit_index_page(self):
-        if not self.login():
-            self.fail('login failed or took too much time to redirect to Iincho')
-
-        delay = 3
-        try:
-            WebDriverWait(self.browser, delay).until(
-                EC.title_contains('Iincho'))
-        except TimeoutException:
-            self.fail('too much time to load index page')
 
         # 記事の一覧が表示されている
         # カテゴリが表示されている
