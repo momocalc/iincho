@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import time
+import os
 
 class EditArticleTest(StaticLiveServerTestCase):
     def setUp(self):
@@ -200,3 +201,22 @@ class GoogleOAuthTestMixin(object):
 
         except TimeoutException:
             print("took too much time to login with Google")
+
+
+    def login(self):
+        # ログインリンクをクリック
+        login_link = self.browser.find_element_by_id("a_login")
+        login_link.click()
+        # googleのログインをする
+        google_id = os.environ.get('TEST_GOOGLE_ID')
+        google_pw = os.environ.get('TEST_GOOGLE_PASSWD')
+        self._login_with_google(google_id, google_pw)
+
+        delay = 3
+        try:
+            WebDriverWait(self.browser, delay).until(
+                EC.title_contains('Iincho'))
+            return True
+
+        except TimeoutException:
+            return False

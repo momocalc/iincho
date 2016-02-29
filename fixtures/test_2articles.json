@@ -1,0 +1,26 @@
+[
+{
+  "fields": {
+    "title": "spam",
+    "body": "test",
+    "created": "2016-02-29T08:12:22.132",
+    "owner": 4,
+    "category": 2,
+    "modified": "2016-02-29T08:12:22.132"
+  },
+  "pk": 1,
+  "model": "articles.article"
+},
+{
+  "fields": {
+    "title": "ham",
+    "body": "hoge",
+    "created": "2016-02-29T08:12:39.088",
+    "owner": 4,
+    "category": 2,
+    "modified": "2016-02-29T08:12:49.585"
+  },
+  "pk": 2,
+  "model": "articles.article"
+}
+]

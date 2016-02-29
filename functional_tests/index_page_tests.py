@@ -9,10 +9,9 @@ import os
 
 
 class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
+    fixtures = ['test_users.json', 'test_2articles.json']
     def setUp(self):
         self.browser = webdriver.Firefox()
-        self.browser.implicitly_wait(3)
-        test_utils.create_test_user(2)
 
     def tearDown(self):
         self.browser.quit()
@@ -35,17 +34,7 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
         login_link = self.browser.find_element_by_id("a_login")
         self.assertEqual('Login with Google', login_link.text)
 
-        # ログインリンクをクリック
-        login_link.click()
-        # googleのログインをする
-        google_id = os.environ.get('TEST_GOOGLE_ID')
-        google_pw = os.environ.get('TEST_GOOGLE_PASSWD')
-        self._login_with_google(google_id, google_pw)
-
-        delay = 3
-        try:
-            WebDriverWait(self.browser, delay).until(
-                EC.title_contains('Iincho'))
-
-        except TimeoutException:
+        if not self.login():
             self.fail('login failed or took too much time to redirect to Iincho')
+
+
