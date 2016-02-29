@@ -5,11 +5,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from core import test_utils
 from .tests import GoogleOAuthTestMixin
-import os
 
 
 class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
     fixtures = ['test_users.json', 'test_categories.json', 'test_2articles.json']
+
     def setUp(self):
         self.browser = webdriver.Firefox()
 
@@ -37,12 +37,36 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
         if not self.login():
             self.fail('login failed or took too much time to redirect to Iincho')
 
-        # 記事の一覧が表示されている
+        # 記事の一覧が投稿日時新しい順で表示されている
+        articles = self.browser.find_elements_by_class_name('article_media')
+        titles = []
+        for a in articles:
+            titles.append(a.find_element_by_class_name('media-heading').text)
+        self.assertListEqual(['spam', 'ham', 'eggs'], titles)
         # カテゴリが表示されている
-        # 投稿日時がyyyy/mm/ddで表示されている
-        # オーナー名が表示されている
-        # 記事名が表示されている
-        # タグが表示されている
+
+        # 1件目
+        self.assertEqual(
+            articles[0].find_element_by_class_name('li_category').text,
+            '(not categorized)')
+
+        # 2件目はカテゴリの階層がリストで表示されている
+        categories = []
+        for c in articles[1].find_elements_by_class_name('li_category'):
+            categories.append(c.text)
+
+        self.assertListEqual(['category1', 'category2', 'category3'], categories)
+        # 投稿日時が表示されている
+        self.assertRegex(
+            articles[0].find_element_by_class_name('article_status').text,
+            '2016/03/01')
+
+        # オーナーのidが表示されている
+        self.assertRegex(
+            articles[0].find_element_by_class_name('article_status').text,
+            'admin')
+
+        # TODO:タグが表示されている
 
         # カテゴリをクリックする
         # クリックしたカテゴリページに遷移
