@@ -5,10 +5,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from core import test_utils
 from .tests import GoogleOAuthTestMixin
+from selenium.webdriver.common.by import By
 
 
 class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
-    fixtures = ['test_users.json', 'test_categories.json', 'test_2articles.json']
+    fixtures = ['test_users.json', 'test_categories.json', 'test_3articles.json']
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -17,10 +18,12 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
         self.browser.quit()
 
     def test_a_user_login_and_visit_index_page(self):
+        delay = 5
+
         # トップページにアクセス
         self.browser.get(self.live_server_url)
 
-        # サイト名が表示されている
+        # ブランド名が表示されている
         brand = self.browser.find_element_by_class_name("navbar-brand")
         self.assertEqual('Iincho', brand.text)
 
@@ -43,8 +46,8 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
         for a in articles:
             titles.append(a.find_element_by_class_name('media-heading').text)
         self.assertListEqual(['spam', 'ham', 'eggs'], titles)
-        # カテゴリが表示されている
 
+        # カテゴリが表示されている
         # 1件目
         self.assertEqual(
             articles[0].find_element_by_class_name('li_category').text,
@@ -56,6 +59,7 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
             categories.append(c.text)
 
         self.assertListEqual(['category1', 'category2', 'category3'], categories)
+
         # 投稿日時が表示されている
         self.assertRegex(
             articles[0].find_element_by_class_name('article_status').text,
@@ -68,9 +72,34 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
 
         # TODO:タグが表示されている
 
-        # カテゴリをクリックする
+        # カテゴリ"category2"をクリックする
+        c2 = articles[1].find_elements_by_class_name('li_category')[1]
+        c2.find_element_by_tag_name('a').click()
+
         # クリックしたカテゴリページに遷移
+        WebDriverWait(self.browser, delay).until(
+            EC.presence_of_element_located((By.TAG_NAME, 'h2'))
+        )
+        self.assertRegex(
+            self.browser.find_element_by_tag_name('h2').text,
+            'category1'
+        )
+        self.assertRegex(
+            self.browser.find_element_by_tag_name('h2').text,
+            'category2'
+        )
+        # ブランド名をクリック
+        brand = self.browser.find_element_by_class_name("navbar-brand")
+        brand.click()
         # トップページに戻る
+        WebDriverWait(self.browser, delay).until(
+            EC.presence_of_element_located((By.TAG_NAME, 'h2'))
+        )
+        self.assertEquals(
+            self.browser.find_element_by_tag_name('h2').text,
+            '新着投稿一覧'
+        )
+
         # オーナー名をクリックする
         # オーナーの記事一覧に遷移する
         # 記事名をクリックする
