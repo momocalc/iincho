@@ -7,7 +7,7 @@ from .tests import GoogleOAuthTestMixin
 from selenium.webdriver.common.by import By
 
 
-class TestTopPageVisitor(GoogleOAuthTestMixin, StaticLiveServerTestCase):
+class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
     fixtures = ['test_users.json', 'test_categories.json', 'test_3articles.json']
 
     def setUp(self):
