@@ -2,7 +2,7 @@
 {
   "fields": {
     "title": "spam",
-    "body": "test",
+    "body": "this is test",
     "created": "2016-03-01T08:12:22.132",
     "owner": 1,
     "category": 1,

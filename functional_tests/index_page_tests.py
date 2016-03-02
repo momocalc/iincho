@@ -95,14 +95,34 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
         WebDriverWait(self.browser, delay).until(
             EC.presence_of_element_located((By.TAG_NAME, 'h2'))
         )
-        self.assertEquals(
+        self.assertEqual(
             self.browser.find_element_by_tag_name('h2').text,
             '新着投稿一覧'
         )
 
         # オーナー名をクリックする
+        status = self.browser.find_elements_by_class_name('article_status')
+        status[0].find_element_by_tag_name('a').click()
         # オーナーの記事一覧に遷移する
+        WebDriverWait(self.browser, delay).until(
+            EC.presence_of_element_located((By.TAG_NAME, 'h2'))
+        )
+        self.assertRegex(
+            self.browser.find_element_by_tag_name('h2').text,
+            'admin')
+
+        # トップページにアクセス
+        self.browser.get(self.live_server_url)
         # 記事名をクリックする
+        articles =self.browser.find_elements_by_class_name('media-heading')
+        articles[0].find_element_by_tag_name('a').click()
         # 記事詳細ページに遷移する
-        # タグをクリックする
+        WebDriverWait(self.browser, delay).until(
+            EC.presence_of_element_located((By.ID, 'detail_title'))
+        )
+        self.assertEqual(
+            self.browser.find_element_by_id('detail_title').text,
+            'spam')
+
+        # TODO:タグをクリックする
         # タグの検索結果に遷移する
