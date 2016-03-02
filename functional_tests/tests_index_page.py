@@ -39,6 +39,15 @@ class TopPageVisitorTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
         if not self.login():
             self.fail('login failed or took too much time to redirect to Iincho')
 
+        # 新規登録リンクが表示される
+        self.assertEqual('新規投稿',
+                         self.browser.find_element_by_id("a_new_entry").text)
+
+        # 検索ボックスが表示され，プレースホルダーが設定されている
+        self.assertEqual('keywords or c:category or #tag',
+                         self.browser.find_element_by_name('query').get_attribute('placeholder')
+                         )
+
         # 記事の一覧が投稿日時新しい順で表示されている
         articles = self.browser.find_elements_by_class_name('article_media')
         titles = []
