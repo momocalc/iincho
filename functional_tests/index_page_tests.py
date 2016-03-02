@@ -1,9 +1,8 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from core import test_utils
 from .tests import GoogleOAuthTestMixin
 from selenium.webdriver.common.by import By
 
@@ -114,7 +113,7 @@ class TestTopPageVisitor(GoogleOAuthTestMixin, StaticLiveServerTestCase):
         # トップページにアクセス
         self.browser.get(self.live_server_url)
         # 記事名をクリックする
-        articles =self.browser.find_elements_by_class_name('media-heading')
+        articles = self.browser.find_elements_by_class_name('media-heading')
         articles[0].find_element_by_tag_name('a').click()
         # 記事詳細ページに遷移する
         WebDriverWait(self.browser, delay).until(

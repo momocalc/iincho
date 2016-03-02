@@ -202,7 +202,6 @@ class GoogleOAuthTestMixin(object):
         except TimeoutException:
             print("took too much time to login with Google")
 
-
     def login(self):
         # ログインリンクをクリック
         login_link = self.browser.find_element_by_id("a_login")
