@@ -1,0 +1,11 @@
+[
+  {
+    "pk": null,
+    "model": "categories.category",
+    "fields": {
+      "modified": "2016-02-29T08:12:22.129",
+      "name": "/(not categorized)/",
+      "created": "2016-02-29T08:12:22.129"
+    }
+  }
+]

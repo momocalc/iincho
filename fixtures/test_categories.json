@@ -1,0 +1,20 @@
+[
+{
+  "pk": 1,
+  "model": "categories.category",
+  "fields": {
+    "modified": "2016-02-29T08:12:22.129",
+    "name": "/(not categorized)/",
+    "created": "2016-02-29T08:12:22.129"
+  }
+},
+{
+  "pk": 2,
+  "model": "categories.category",
+  "fields": {
+    "modified": "2016-02-29T08:12:22.129",
+    "name": "/category1/category2/category3/",
+    "created": "2016-02-29T08:12:22.129"
+  }
+}
+]

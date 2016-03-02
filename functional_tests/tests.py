@@ -2,11 +2,14 @@ from django.test.utils import override_settings
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-# from django.contrib.auth.models import User
 from core import test_utils
-import re
 
-import unittest
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+import time
+import os
 
 class EditArticleTest(StaticLiveServerTestCase):
     def setUp(self):
@@ -146,3 +149,73 @@ class EditArticleTest(StaticLiveServerTestCase):
         # 詳細ページに遷移
         pass
 
+
+class GoogleOAuthTestMixin(object):
+    '''
+    webDriverでGoogleログインを行う
+    '''
+
+    def __approve_if_hasnt_approved(self):
+
+        delay = 5
+        try:
+            WebDriverWait(self.browser, delay).until(
+                EC.presence_of_element_located((By.ID, 'submit_approve_access')))
+
+            approve = self.browser.find_element_by_id('submit_approve_access')
+
+            # wait to enable approve button
+            for i in range(5):
+                if approve.is_enabled():
+                    approve.click()
+                    break
+                else:
+                    time.sleep(1)
+
+        except TimeoutException:
+            pass
+
+    def _login_with_google(self, email, passwd):
+        '''
+        Googleアカウントでログイン
+        アカウント，パスワードの正当性は確認しない．
+        :param email: gmail account
+        :param passwd: gmail password
+        :return: None
+        '''
+
+        delay = 3
+        try:
+            WebDriverWait(self.browser, delay).until(
+                EC.title_contains('Google'))
+
+            email_elem = self.browser.find_element_by_id('Email')
+            email_elem.send_keys(email)
+            self.browser.find_element_by_id('next').click()
+            WebDriverWait(self.browser, delay).until(
+                EC.presence_of_element_located((By.ID, 'Passwd')))
+            passwd_elem = self.browser.find_element_by_id('Passwd')
+            passwd_elem.send_keys(passwd)
+            self.browser.find_element_by_id('signIn').click()
+            self.__approve_if_hasnt_approved()
+
+        except TimeoutException:
+            print("took too much time to login with Google")
+
+    def login(self):
+        # ログインリンクをクリック
+        login_link = self.browser.find_element_by_id("a_login")
+        login_link.click()
+        # googleのログインをする
+        google_id = os.environ.get('TEST_GOOGLE_ID')
+        google_pw = os.environ.get('TEST_GOOGLE_PASSWD')
+        self._login_with_google(google_id, google_pw)
+
+        delay = 3
+        try:
+            WebDriverWait(self.browser, delay).until(
+                EC.title_contains('Iincho'))
+            return True
+
+        except TimeoutException:
+            return False
