@@ -1,8 +1,7 @@
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST,require_GET
 from .models import Article, Comment, Tag
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -14,7 +13,9 @@ from categories.views import CategoryListViewMixin
 import re
 from django.db.models import Q, Prefetch
 from core.mixins import TagSearchMixin, CategorySearchMixin
-
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.conf import settings
 
 NOT_CATEGORISED = '/(not categorised)/'
 
@@ -173,16 +174,30 @@ class ArticleDetailAndCreateCommentView(LoginRequiredMixin, CreateView):
 
 
 class ArticleEditMixin(object):
+
+    model = Article
+    template_name = 'article_form.jinja2'
+    form_class = ArticleForm
+
     def get_context_data(self, **kwargs):
         context_data = super(ArticleEditMixin, self).get_context_data(**kwargs)
         context_data['DEMO'] = settings.DEMO
         return context_data
 
+    def get_form(self, form_class=None):
+        form = super(ArticleEditMixin, self).get_form()
+        #TODO: set template's titles
+        template_choices = [('', 'テンプレート')]
+        template_articles = Article.objects.filter(category__name__startswith='/template/')
+
+        for template in template_articles:
+            template_choices.append((template.id,template.title))
+
+        form.fields['templates'].choices = template_choices
+        return form
+
 
 class ArticleCreateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategorizeMixin, CreateView):
-    model = Article
-    form_class = ArticleForm
-    template_name = 'article_form.jinja2'
 
     def get_success_url(self):
         return reverse('articles:detail', kwargs={'pk': self.object.id})
@@ -195,10 +210,6 @@ class ArticleCreateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategori
 
 class ArticleUpdateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategorizeMixin,
                         IsOwnerMixin, UpdateView):
-    model = Article
-    form_class = ArticleForm
-    # success_url = reverse_lazy('articles:article_detail', )
-    template_name = 'article_form.jinja2'
 
     def get_success_url(self):
         if self._object:
@@ -250,3 +261,15 @@ def delete_comment(request, article_id):
                 request, "You are not allowed to edit this comment")
 
     return redirect('articles:detail', article_id)
+
+
+@require_GET
+def select_template(request):
+    article_id = request.GET.get('article')
+    article = get_object_or_404(Article, pk=article_id)
+    result = {}
+    from .utils import template_formatting
+    result['title'] = template_formatting(request, article.title)
+    result['body'] = template_formatting(request, article.body)
+    return JsonResponse(result)
+

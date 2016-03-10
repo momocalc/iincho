@@ -184,15 +184,18 @@
 
             $.ajax({
                 type: "GET",
-                url: "template/" + $(this).val(),
+                url: '{{ url('articles:select_template') }}',
+                data:{'article': $(this).val()},
                 dataType: 'json',
                 timeout: 10000
-            })
-            .done(function(data){
-                console.log("done");
+            }).done(function(data){
+                console.log(data);
+                $('#article-title').val(data.title);
+                editor.setValue(data.body);
+                editor.clearHistory();
             })
             .fail(function(){
-                console.log("fail");
+                alert('failed to load template.');
             });
         }
     </script>
