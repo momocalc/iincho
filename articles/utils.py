@@ -10,7 +10,9 @@ def template_formatting(request, template_val):
 
 def rebuild_edit_title(title,category,tags):
     result = ''
-    if category == categories.NOT_CATEGORISED:
+    if not category or \
+            category in ('/', categories.NOT_CATEGORISED):
+
         result = title
     else:
         result = category + title

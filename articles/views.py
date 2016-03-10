@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.conf import settings
 import categories
+from .utils import rebuild_edit_title, template_formatting
 
 class ArticleSearchMixin(object):
 
@@ -228,7 +229,6 @@ class ArticleUpdateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategori
         data = super(ArticleUpdateView, self).get_initial()
         article = self.get_object()
 
-        from .utils import rebuild_edit_title
         tags = [x.name for x in Tag.objects.filter(article=article)]
         data['title'] = rebuild_edit_title(article.title, article.category.name, tags)
 
@@ -258,10 +258,14 @@ def delete_comment(request, article_id):
 @require_GET
 def select_template(request):
     article_id = request.GET.get('article')
+
     article = get_object_or_404(Article, pk=article_id)
+    tags = [x.name for x in Tag.objects.filter(article=article)]
+    category = article.category.name[article.category.name.find('/', 1):]
+    title = rebuild_edit_title(article.title,category , tags)
+
     result = {}
-    from .utils import template_formatting
-    result['title'] = template_formatting(request, article.title)
+    result['title'] = template_formatting(request, title)
     result['body'] = template_formatting(request, article.body)
     return JsonResponse(result)
 
