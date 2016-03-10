@@ -11,4 +11,6 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/edit/$', ArticleUpdateView.as_view(), name='update'),
     url(r'^(?P<pk>\d+)/delete/$', ArticleDeleteView.as_view(), name='delete'),
     url(r'^(?P<article_id>\d+)/comment_delete/$', delete_comment, name='comment_delete'),
+    url(r'^select_template/$',
+        'articles.views.select_template', name='select_template'),
 ]

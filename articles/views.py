@@ -16,9 +16,7 @@ from core.mixins import TagSearchMixin, CategorySearchMixin
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.conf import settings
-
-NOT_CATEGORISED = '/(not categorised)/'
-
+import categories
 
 class ArticleSearchMixin(object):
 
@@ -53,7 +51,7 @@ class SetTagsAndCategorizeMixin(object):
         last_slash = text.rfind('/')
 
         if last_slash < 1:
-            category = NOT_CATEGORISED
+            category = categories.NOT_CATEGORISED
         else:
             category = text[:last_slash+1]
             if not category.startswith('/'):
@@ -168,7 +166,8 @@ class ArticleDetailAndCreateCommentView(LoginRequiredMixin, CreateView):
         article = Article.objects.get(pk=self.kwargs['pk'])
         context_data['article'] = article
         context_data['tags'] = Tag.objects.filter(article=article)
-        context_data['category'] = article.category.name if article.category.name != NOT_CATEGORISED else ''
+        context_data['category'] = \
+            article.category.name if article.category.name != categories.NOT_CATEGORISED else ''
         context_data['comments'] = Comment.objects.filter(article=self.kwargs['pk']).select_related('user', 'user__profile').order_by('modified')
         return context_data
 
@@ -227,19 +226,12 @@ class ArticleUpdateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategori
 
     def get_initial(self):
         data = super(ArticleUpdateView, self).get_initial()
+        article = self.get_object()
 
-        title = self.object.title
-        category = self.object.category.name
+        from .utils import rebuild_edit_title
+        tags = [x.name for x in Tag.objects.filter(article=article)]
+        data['title'] = rebuild_edit_title(article.title, article.category.name, tags)
 
-        if category != NOT_CATEGORISED:
-            title = category + title
-
-        tags = ', '.join(
-            [x.name for x in Tag.objects.filter(article=self.get_object())])
-        if tags:
-            title = title + ' #' + tags
-
-        data['title'] = title
         return data
 
 
