@@ -40,6 +40,6 @@ def __rebuild_edit_title(title, category, tags=None):
 
     tags_str = ', '.join(tags)
     if tags_str:
-        result = title + ' #' + tags_str
+        result = result + ' #' + tags_str
 
     return result
