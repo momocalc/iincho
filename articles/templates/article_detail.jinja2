@@ -121,7 +121,7 @@
         $(function(){
             var md = new markdownRender();
             var out = document.getElementById('out');
-            out.innerHTML = md.render(document.getElementById('raw_body').innerText);
+            out.innerHTML = md.render($('#raw_body').text());
             emojify.run(out);
 
             $('.md_comment').each(function(){
