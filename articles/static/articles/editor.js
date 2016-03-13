@@ -6,8 +6,9 @@ window.saveAs = window.saveAs || window.webkitSaveAs || window.mozSaveAs || wind
 $(function(){
     function editor_adjust(){
         var h = $(window).height(); //ウィンドウの高さ
-        var h1= $('#top-nav').height() + $('.editor-footer').height(); //他要素の高さ
-        h1 = h1 + 80;
+        var h1= $('#top-nav').height() + $('.editor-header').height() + $('.editor-footer').height(); //他要素の高さ
+        var margin = 40;
+        h1 = h1 + margin;
         $('.editor-textarea').css('height', h-h1); //可変部分の高さを適用
     }
 

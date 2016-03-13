@@ -46,6 +46,10 @@
     margin-bottom:5px;
 }
 
+.editor-header input {
+  margin:10px 0;
+}
+
 .editor-footer{
     margin:5px 0;
 }
