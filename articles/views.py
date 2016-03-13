@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.conf import settings
 import categories
-from .utils import rebuild_edit_title, template_formatting
+from .utils import rebuild_edit_title, rebuild_edit_title_without_template_prefix, template_formatting
 
 class ArticleSearchMixin(object):
 
@@ -186,12 +186,11 @@ class ArticleEditMixin(object):
 
     def get_form(self, form_class=None):
         form = super(ArticleEditMixin, self).get_form()
-        #TODO: set template's titles
         template_choices = [('', 'テンプレート')]
         template_articles = Article.objects.filter(category__name__startswith='/template/')
 
-        for template in template_articles:
-            template_choices.append((template.id,template.title))
+        template_choices += \
+            [(x.id, rebuild_edit_title_without_template_prefix(x)) for x in template_articles]
 
         form.fields['templates'].choices = template_choices
         return form
@@ -228,9 +227,7 @@ class ArticleUpdateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategori
     def get_initial(self):
         data = super(ArticleUpdateView, self).get_initial()
         article = self.get_object()
-
-        tags = [x.name for x in Tag.objects.filter(article=article)]
-        data['title'] = rebuild_edit_title(article.title, article.category.name, tags)
+        data['title'] = rebuild_edit_title(article)
 
         return data
 
@@ -260,12 +257,9 @@ def select_template(request):
     article_id = request.GET.get('article')
 
     article = get_object_or_404(Article, pk=article_id)
-    tags = [x.name for x in Tag.objects.filter(article=article)]
-    category = article.category.name[article.category.name.find('/', 1):]
-    title = rebuild_edit_title(article.title,category , tags)
+    title = rebuild_edit_title_without_template_prefix(article)
 
     result = {}
     result['title'] = template_formatting(request, title)
     result['body'] = template_formatting(request, article.body)
     return JsonResponse(result)
-

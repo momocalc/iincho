@@ -16,5 +16,14 @@
     "name": "/category1/category2/category3/",
     "created": "2016-02-29T08:12:22.129"
   }
-}
+},
+  {
+    "pk": 3,
+    "model": "categories.category",
+    "fields": {
+      "modified": "2016-02-29T08:12:22.129",
+      "name": "/template/日報/%year/%month/%day/",
+      "created": "2015-02-20T08:12:22.129"
+    }
+  }
 ]

@@ -1,0 +1,38 @@
+[
+  {
+    "fields": {
+      "title": "%name",
+      "body": "# 作業内容  # 所感",
+      "created": "2014-03-01T08:12:22.132",
+      "owner": 1,
+      "category": 3,
+      "modified": "2016-03-02T08:12:22.132"
+    },
+    "pk": null,
+    "model": "articles.article"
+  },
+  {
+    "fields": {
+      "title": "ham",
+      "body": "hoge",
+      "created": "2016-02-29T08:12:39.088",
+      "owner": 1,
+      "category": 2,
+      "modified": "2016-02-29T08:12:49.585"
+    },
+    "pk": null,
+    "model": "articles.article"
+  },
+  {
+    "fields": {
+      "title": "eggs",
+      "body": "test",
+      "created": "2016-02-28T08:12:22.132",
+      "owner": 1,
+      "category": 1,
+      "modified": "2016-02-29T08:15:22.132"
+    },
+    "pk": null,
+    "model": "articles.article"
+  }
+]

@@ -10,7 +10,7 @@ from selenium.webdriver.common.keys import Keys
 from datetime import date
 
 class ArticleTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
-    fixtures = ['test_users.json', 'test_categories.json', 'test_3articles.json']
+    fixtures = ['test_users.json', 'test_categories.json', 'test_articles.json']
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -33,11 +33,13 @@ class ArticleTest(GoogleOAuthTestMixin, StaticLiveServerTestCase):
 
         # テンプレートから"日報"を選択する
         templates = Select(self.browser.find_element_by_id('id_templates'))
-        templates.select_by_visible_text('日報/%year/%month/%day/%name')
+        templates.select_by_visible_text('/日報/%year/%month/%day/%name')
         self.browser.implicitly_wait(2)
         # タイトルに「日報/<年>/<月>/<日>/」が入力されている
         # TODO:ユーザー名のテスト
-        self.assertRegex(title.text,
+        title = self.browser.find_element_by_id('article-title')
+        print(title.get_attribute('value'))
+        self.assertRegex(title.get_attribute('value'),
                          '日報/{}/'.format(date.today().strftime("%Y/%m/%d")))
         # 本文に「# 作業内容」,「# 所感」が表示されている
         body = self.browser.find_element_by_id('editor_area')
