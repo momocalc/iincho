@@ -191,9 +191,6 @@ class GoogleOAuthTestMixin(object):
 
             email_elem = self.browser.find_element_by_id('Email')
             email_elem.send_keys(email)
-            self.browser.find_element_by_id('next').click()
-            WebDriverWait(self.browser, delay).until(
-                EC.presence_of_element_located((By.ID, 'Passwd')))
             passwd_elem = self.browser.find_element_by_id('Passwd')
             passwd_elem.send_keys(passwd)
             self.browser.find_element_by_id('signIn').click()

@@ -40,15 +40,15 @@
                 <div class="errors">
                     {{ form.non_field_errors() }}
                 </div>
+                {{ form.errors }}
                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                 <div class="errors">
                     {{ form.title.errors }}
                 </div>
                 <div class="editor-header">
-                    <div class="input-group input-group-lg">
-                        {{ form.title }}
-                    </div>
+                    {{ form.templates }}
+                    {{ form.title }}
                 </div>
                 <div class="errors">
                     {{ form.body.errors }}
@@ -58,7 +58,7 @@
                 </div>
                 <div class="row editor-footer">
                     <div>
-                        <button class="btn btn-md btn-primary pull-right">投稿</button>
+                        <button id="btn_post" class="btn btn-md btn-primary pull-right">投稿</button>
                     </div>
                 </div>
             </form>
@@ -174,8 +174,30 @@
                     alert('failed upload.');
                 }
             }).prop('disabled', !$.support.fileInput)
-                    .parent().addClass($.support.fileInput ? undefined : 'disabled')
+            .parent().addClass($.support.fileInput ? undefined : 'disabled');
+
+            $("#id_templates").change(select_template);
         });
+
+        function select_template(){
+            if($(this).val() == "") return false;
+
+            $.ajax({
+                type: "GET",
+                url: '{{ url('articles:select_template') }}',
+                data:{'article': $(this).val()},
+                dataType: 'json',
+                timeout: 10000
+            }).done(function(data){
+                console.log(data);
+                $('#article-title').val(data.title);
+                editor.setValue(data.body);
+                editor.clearHistory();
+            })
+            .fail(function(){
+                alert('failed to load template.');
+            });
+        }
     </script>
     <script src="{{ static('articles/markdown.js') }}"></script>
     <script src="{{ static('articles/editor.js') }}"></script>

@@ -18,6 +18,13 @@ class ArticleForm(forms.ModelForm):
         )
     )
 
+    templates = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(
+            attrs={'class': 'form-control', }
+        )
+    )
+
     class Meta:
         model = Article
         fields = ['body', ]
