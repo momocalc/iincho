@@ -12,7 +12,7 @@
     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <h1>削除確認</h1>
         {{ object.title }}
-        <input type="submit" value="削除" />
+        <input type="submit" value="削除" onclick="setDisable(this)" />
 
     </form>
 {% endblock %}
