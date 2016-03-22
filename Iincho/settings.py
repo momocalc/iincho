@@ -156,7 +156,20 @@ LOGIN_REDIRECT_URL = '/'
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET')
 
-SOCIAL_AUTH_PIPELINE = DEFAULT_AUTH_PIPELINE + ('accounts.pipelines.get_user_avatar',)
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'accounts.pipelines.get_user_avatar',
+)
+
+SOCIAL_AUTH_WHITELISTED_DOMAINS = os.environ.get('AUTH_WHITELISTED_DOMAINS', '').split()
+SOCIAL_AUTH_WHITELISTED_EMAILS = os.environ.get('AUTH_WHITELISTED_EMAILS', '').split()
 
 # media
 MEDIA_ROOT = os.path.join(BASE_DIR, 'site_media/')
