@@ -242,7 +242,7 @@ class ArticleDeleteView(IsOwnerMixin, DeleteView):
 def delete_comment(request, article_id):
     comment_id = request.POST.get('comment_id')
     if comment_id:
-        obj = Comment.objects.get(pk=comment_id)
+        obj = get_object_or_404(Comment, pk=comment_id)
         if obj.user == request.user or request.user.is_superuser:
             obj.delete()
         else:
