@@ -8,7 +8,7 @@ class Node():
         self.children = []
         self.name = name
         self.count = 0
-
+        self.sort_number = 0
         self.path = ""
 
         if parent_path:
@@ -16,13 +16,13 @@ class Node():
         elif name:
             self.path = '/' + name + '/'
 
-    def set_route(self, current_node):
-        if current_node.startswith(self.path):
-            self.is_route = True
 
     def __getattr__(self, item):
         if item == 'encoded_path':
             return urllib.parse.quote(self.path)
+
+        if item == 'sorted_children':
+            return sorted(self.children, key=lambda x:(x.sort_number, x.name))
 
     def __str__(self):
         if not self.children:
@@ -47,19 +47,38 @@ def split_path(category):
     return result
 
 
-def make_tree(parent, vals, num_articles, current_idx):
-    if not vals:
+def __is_final_part(splitted_category_name, current_idx):
+    """
+    splitされたカテゴリ名の指定インデックスがカテゴリ名の最終要素であるか
+    最終要素が空要素ならば，そのひとつ前を最終要素とする
+    :param splitted_category_name: カテゴリを/で区切ったリスト
+    :param current_idx: 確認対象Index
+    :return: splitted_category_name[current_idx]がカテゴリ名の最終要素であるかどうか
+    """
+    if current_idx == len(splitted_category_name) - 1:
+        return True
+
+    if current_idx  == len(splitted_category_name) - 2:
+        if not splitted_category_name[-1]:
+            return True
+
+    return False
+
+
+def __make_tree(parent, category, splitted_category_name,  current_idx):
+    if not splitted_category_name:
         return
 
-    if current_idx >= len(vals):
+    if current_idx >= len(splitted_category_name):
         return
 
-    if vals[current_idx] == '':
-        make_tree(parent, vals, num_articles, current_idx+1)
+    if splitted_category_name[current_idx] == '':
+        __make_tree(parent, category, splitted_category_name, current_idx + 1)
         return
 
-    current_name = vals[current_idx]
+    current_name = splitted_category_name[current_idx]
 
+    # 親をさがす
     tmp_list = [x for x in parent.children if x.name == current_name]
 
     if tmp_list:
@@ -67,13 +86,15 @@ def make_tree(parent, vals, num_articles, current_idx):
     else:
         tmp_node = Node(parent.path, current_name)
         parent.children.append(tmp_node)
+        if __is_final_part(splitted_category_name, current_idx):
+            tmp_node.sort_number = category.sort_number
 
-    tmp_node.count += num_articles
-    make_tree(tmp_node, vals, num_articles, current_idx+1)
+    tmp_node.count += category.num_articles
+    __make_tree(tmp_node, category, splitted_category_name, current_idx + 1)
 
 
 def category_tree(categories):
     tree = Node('', '')
     for category in categories:
-        make_tree(tree, category.name.split('/'), category.num_articles, 0)
+        __make_tree(tree, category, category.name.split('/'), 0)
     return tree
