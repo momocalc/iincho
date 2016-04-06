@@ -5,7 +5,7 @@
     {%  if category_list %}
         {% set root = category_list | category_tree %}
 {# ルートは表示しない #}
-        {%  for n in root.children %}
+        {%  for n in root.sorted_children %}
             {{ make_tree_list(n, current_path) }}
         {% endfor %}
     {%  endif %}
@@ -28,7 +28,7 @@
         {% endif %}
     {% if node.children %}
         nodes: [
-            {% for c in node.children %}
+            {% for c in node.sorted_children %}
                 {{ make_tree_list(c, current_path) }}
             {% endfor %}
         ],

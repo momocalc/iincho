@@ -5,7 +5,18 @@
     "fields": {
       "modified": "2016-02-29T08:12:22.129",
       "name": "/(not categorized)/",
-      "created": "2016-02-29T08:12:22.129"
+      "created": "2016-02-29T08:12:22.129",
+      "sort_number": 999998
+    }
+  },
+  {
+    "pk": null,
+    "model": "categories.category",
+    "fields": {
+      "modified": "2016-02-29T08:12:22.129",
+      "name": "/template/",
+      "created": "2016-02-29T08:12:22.129",
+      "sort_number": 999999
     }
   }
 ]
