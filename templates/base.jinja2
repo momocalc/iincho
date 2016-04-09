@@ -51,7 +51,7 @@
                         <li><a id="a_new_entry" href="{{ url('articles:create') }}">新規投稿</a></li>
                         <li id="a_user_menu" class="dropdown" >
                             <a href="#" data-toggle="dropdown" class="a_icon">
-                               <img src="{{ bas_macro.user_icon_url(user.profile.photo) }}" alt="" class="user_icon">
+                               <img src="{{ bas_macro.user_icon_url(user) }}" alt="" class="user_icon">
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">

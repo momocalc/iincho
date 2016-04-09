@@ -5,7 +5,7 @@
     {% for article in object_list %}
         <div class="media article_media">
             <div class="media-left">
-                <img class="owner_icon" src="{{ bas_macro.user_icon_url(article.owner.profile.photo) }}" alt="owner-photo" />
+                <img class="owner_icon" src="{{ bas_macro.user_icon_url(article.owner) }}" alt="owner-photo" />
             </div>
             <div class="media-body">
                 <div class="article_status">
