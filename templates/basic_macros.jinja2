@@ -48,9 +48,10 @@
 </nav>
 {% endmacro %}
 
-{% macro user_icon_url(file_name = None) -%}
-    {% if file_name %}
-        {{ MEDIA_URL }}accounts/images/icon/{{ file_name }}
+{# ユーザーアイコンURL取得 #}
+{% macro user_icon_url(a_user) -%}
+    {% if a_user.profile and a_user.profile.photo %}
+        {{ MEDIA_URL }}accounts/images/icon/{{ a_user.profile.photo }}
     {% else %}
         {{ static("accounts/images/no-icon.png") }}
     {% endif %}

@@ -26,7 +26,7 @@
 
         <div class="pull-right">
            <span>
-               <img class="owner_icon" src="{{ bas_macro.user_icon_url(article.owner.profile.photo) }}" alt="owner-photo" />
+               <img class="owner_icon" src="{{ bas_macro.user_icon_url(article.owner) }}" alt="owner-photo" />
                <a href="{{ url('articles:owners_articles', article.owner.id)  }}">
                {{ article.owner.username }}</a> が
            </span>
@@ -66,7 +66,7 @@
         {% for comment in comments %}
             <div class="media">
                 <div class="media-left">
-                    <img class="user_icon" src="{{ b_macro.user_icon_url(comment.user.profile.photo) }}" alt="comment-user-photo" />
+                    <img class="user_icon" src="{{ b_macro.user_icon_url(comment.user) }}" alt="comment-user-photo" />
                 </div>
                 <div class="media-body">
                     <div class="comment_status">
@@ -87,7 +87,7 @@
         {# コメント投稿 #}
         <div class="media">
             <div class="media-left">
-                <img class="user_icon" src="{{ b_macro.user_icon_url(user.profile.photo) }}" alt="comment-user-photo" />
+                <img class="user_icon" src="{{ b_macro.user_icon_url(user) }}" alt="comment-user-photo" />
             </div>
             <div class="media-body">
                 <div class="comment_status">
