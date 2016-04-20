@@ -2,7 +2,9 @@ from django.conf import settings
 import urllib.request
 from .models import Profile
 from social.backends.google import GoogleOAuth2
+from django.core.files import File
 import os
+import uuid
 
 
 def ensure_sub_dir(*dir_names):
@@ -12,8 +14,12 @@ def ensure_sub_dir(*dir_names):
     return res
 
 
-def download_user_avator(url):
-    import uuid
+def download_user_photo(url):
+    """
+    Googleアカウントのアイコンを取得する
+    :param url:
+    :return:
+    """
     ext = os.path.splitext(
         os.path.basename(url).split('?')[0])[1]
     image_name = str(uuid.uuid1()) + ext
@@ -28,12 +34,16 @@ def download_user_avator(url):
     return tmp_path, ext
 
 
-def __set_avatar(url, user):
-    from django.core.files import File
-    # local_file = open(tmp_path)
-    tmp_path, ext = download_user_avator(url)
+def __set_photo(url, user):
+    """
+    プロファイルにGoogleアカウントのアイコンを登録する
+    :param url: アイコンURL
+    :param user:
+    """
+    tmp_path, ext = download_user_photo(url)
     f = open(tmp_path, 'rb')
     user.profile.photo.save(user.username + ext, File(f))
+
 
 def get_user_avatar(strategy, user, response, is_new=False, *args, **kwargs):
 
@@ -44,5 +54,5 @@ def get_user_avatar(strategy, user, response, is_new=False, *args, **kwargs):
         Profile(user=user).save()
 
     if isinstance(kwargs['backend'], GoogleOAuth2) and not user.profile.photo:
-        __set_avatar(response['image']['url'], user)
+        __set_photo(response['image']['url'], user)
         user.profile.save()
