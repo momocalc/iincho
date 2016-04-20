@@ -51,7 +51,7 @@
 {# ユーザーアイコンURL取得 #}
 {% macro user_icon_url(a_user) -%}
     {% if a_user.profile and a_user.profile.photo %}
-        {{ MEDIA_URL }}accounts/images/icon/{{ a_user.profile.photo }}
+        {{ MEDIA_URL }}{{ a_user.profile.photo }}
     {% else %}
         {{ static("accounts/images/no-icon.png") }}
     {% endif %}
