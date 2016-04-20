@@ -16,8 +16,8 @@ def ensure_sub_dir(*dir_names):
 
 def download_user_photo(url):
     """
-    Googleアカウントのアイコンを取得する
-    :param url:
+    アイコンを取得する
+    :param url:アイコンURL
     :return:
     """
     ext = os.path.splitext(
@@ -36,7 +36,7 @@ def download_user_photo(url):
 
 def __set_photo(url, user):
     """
-    プロファイルにGoogleアカウントのアイコンを登録する
+    プロファイルにアイコンを登録する
     :param url: アイコンURL
     :param user:
     """
