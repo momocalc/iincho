@@ -16,13 +16,12 @@ class Node():
         elif name:
             self.path = '/' + name + '/'
 
-
     def __getattr__(self, item):
         if item == 'encoded_path':
             return urllib.parse.quote(self.path)
 
         if item == 'sorted_children':
-            return sorted(self.children, key=lambda x:(x.sort_number, x.name))
+            return sorted(self.children, key=lambda x: (x.sort_number, x.name))
 
     def __str__(self):
         if not self.children:
@@ -58,14 +57,14 @@ def __is_final_part(splitted_category_name, current_idx):
     if current_idx == len(splitted_category_name) - 1:
         return True
 
-    if current_idx  == len(splitted_category_name) - 2:
+    if current_idx == len(splitted_category_name) - 2:
         if not splitted_category_name[-1]:
             return True
 
     return False
 
 
-def __make_tree(parent, category, splitted_category_name,  current_idx):
+def __make_tree(parent, category, splitted_category_name, current_idx):
     if not splitted_category_name:
         return
 

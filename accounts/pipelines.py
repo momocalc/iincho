@@ -46,7 +46,6 @@ def __set_photo(url, user):
 
 
 def get_user_avatar(strategy, user, response, is_new=False, *args, **kwargs):
-
     if not user:
         return
 

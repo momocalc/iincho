@@ -19,6 +19,7 @@ class ContentTypeRestrictedFileField(FileField):
             250MB - 214958080
             500MB - 429916160
     """
+
     def __init__(self, *args, **kwargs):
         if "content_type_pattern" in kwargs:
             self.content_pattern = re.compile(kwargs.pop("content_type_pattern"))
@@ -30,7 +31,6 @@ class ContentTypeRestrictedFileField(FileField):
         else:
             self.max_upload_size = 0
 
-
         super(ContentTypeRestrictedFileField, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
@@ -41,7 +41,8 @@ class ContentTypeRestrictedFileField(FileField):
 
         if self.content_pattern.match(content_type):
             if file._size > self.max_upload_size:
-                raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(self.max_upload_size), filesizeformat(file._size)))
+                raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (
+                filesizeformat(self.max_upload_size), filesizeformat(file._size)))
         else:
             raise forms.ValidationError(_('Filetype not supported.'))
 

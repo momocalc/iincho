@@ -118,7 +118,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Iincho.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {'default': dj_database_url.config(
@@ -134,7 +133,6 @@ TIME_ZONE = 'Asia/Tokyo'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = False
-
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'

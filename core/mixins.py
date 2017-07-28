@@ -2,7 +2,6 @@ import re
 
 
 class PopQueryHelper(object):
-
     def pop_queries(self, *keys):
         if hasattr(self, 'query'):
             q = self.query
@@ -17,7 +16,6 @@ class PopQueryHelper(object):
 
 
 class TagSearchMixin(PopQueryHelper, object):
-
     def get_queryset(self):
         queryset = super(TagSearchMixin, self).get_queryset()
 
@@ -27,7 +25,7 @@ class TagSearchMixin(PopQueryHelper, object):
 
         in_q = ','.join(['%s'] * len(tags))
         sql = 'articles_article.id in (select article_id from articles_tag where name in ({0}) ' \
-            'group by article_id having count(*) = %s)'.format(in_q)
+              'group by article_id having count(*) = %s)'.format(in_q)
 
         params = tags
         params.append(len(tags))  # count
@@ -35,7 +33,6 @@ class TagSearchMixin(PopQueryHelper, object):
 
 
 class CategorySearchMixin(PopQueryHelper, object):
-
     def get_queryset(self):
         queryset = super(CategorySearchMixin, self).get_queryset()
 
