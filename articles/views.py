@@ -47,16 +47,16 @@ class SetTagsAndCategorizeMixin(object):
         except Category.DoesNotExist:
             return Category.objects.create(name=name)
 
-    def __split_category(self, str):
-        text = re.sub(r'/*\s*/\s*', '/', str.strip())
+    def __split_category(self, title):
+        text = re.sub(r'/*\s*/\s*', '/', title.strip())
         last_slash = text.rfind('/')
 
         if last_slash < 1:
             category = categories.NOT_CATEGORISED
         else:
-            category = text[:last_slash+1]
-            if not category.startswith('/'):
-                category = '/' + category
+            category = text[:last_slash]
+            if category.startswith('/'):
+                category = category[1:]
 
         if last_slash+1 >= len(text):
             other_text = None
@@ -187,7 +187,7 @@ class ArticleEditMixin(object):
     def get_form(self, form_class=None):
         form = super(ArticleEditMixin, self).get_form()
         template_choices = [('', 'テンプレート')]
-        template_articles = Article.objects.filter(category__name__startswith='/template/')
+        template_articles = Article.objects.filter(category__name__startswith='template/')
 
         template_choices += \
             [(x.id, rebuild_edit_title_without_template_prefix(x)) for x in template_articles]

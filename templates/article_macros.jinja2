@@ -14,11 +14,11 @@
                         {{ article.created | datetimeformat('%Y/%m/%d') }}
                     </div>
                     <div class="article_category">
-                        {% set c_link = '' %}
                         <ul>
-                        {% for c_name in article.category.name.split('/') if c_name %}
-                            {% set c_link = c_link + c_name + '/' %}
-                            <li class="li_category"><a href="{{ url('index') }}?path=/{{ c_link | iriencode}}">{{ c_name }}</a></li>
+                        {% set c_link = '' %}
+                        {% for c_name in article.category.name.split('/') %}
+                            {% set c_link = c_name if not c_link else (c_link + '/'+ c_name) %}
+                            <li class="li_category"><a href="{{ url('index') }}?path={{ c_link | iriencode}}">{{ c_name }}</a></li>
                         {% endfor %}
                         </ul>
                     </div>

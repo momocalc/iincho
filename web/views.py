@@ -14,9 +14,6 @@ class IndexView(CategoryListViewMixin, LoginRequiredMixin, ListView):
 
     def __get_path_from_request(self):
         path = self.request.GET.get('path')
-        if path:
-            if not path.endswith('/'):
-                path += '/'
 
         return path
 
