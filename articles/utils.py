@@ -6,7 +6,7 @@ from .models import Tag
 def template_formatting(request, template_val):
     today = date.today()
     return template_val.replace('%year', today.strftime('%Y')) \
-        .replace('%month',  today.strftime('%m')) \
+        .replace('%month', today.strftime('%m')) \
         .replace('%day', today.strftime('%d')) \
         .replace('%name', request.user.username)
 
@@ -29,7 +29,7 @@ def rebuild_edit_title_without_template_prefix(article):
 def __rebuild_edit_title(title, category, tags=None):
     result = ''
     if not category or \
-            category in ('/', categories.NOT_CATEGORISED):
+                    category in ('/', categories.NOT_CATEGORISED):
 
         result = title
     else:

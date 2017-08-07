@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
-from django.views.decorators.http import require_POST,require_GET
+from django.views.decorators.http import require_POST, require_GET
 from .models import Article, Comment, Tag
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -16,7 +16,6 @@ from django.conf import settings
 from .utils import rebuild_edit_title, rebuild_edit_title_without_template_prefix, template_formatting
 import categories
 from articles.mixins import ArticleListMixin, ArticleSearchMixin, IsOwnerMixin, SetTagsAndCategorizeMixin
-
 
 
 class ArticleListView(ArticleListMixin, ArticleSearchMixin,
@@ -59,12 +58,13 @@ class ArticleDetailAndCreateCommentView(LoginRequiredMixin, CreateView):
         context_data['tags'] = Tag.objects.filter(article=article)
         context_data['category'] = \
             article.category.name if article.category.name != categories.NOT_CATEGORISED else ''
-        context_data['comments'] = Comment.objects.filter(article=self.kwargs['pk']).select_related('user', 'user__profile').order_by('modified')
+        context_data['comments'] = Comment.objects.filter(article=self.kwargs['pk']).select_related('user',
+                                                                                                    'user__profile').order_by(
+            'modified')
         return context_data
 
 
 class ArticleEditMixin(object):
-
     model = Article
     template_name = 'article_form.jinja2'
     form_class = ArticleForm
@@ -87,7 +87,6 @@ class ArticleEditMixin(object):
 
 
 class ArticleCreateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategorizeMixin, CreateView):
-
     def get_success_url(self):
         return reverse('articles:detail', kwargs={'pk': self.object.id})
 
@@ -99,7 +98,6 @@ class ArticleCreateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategori
 
 class ArticleUpdateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategorizeMixin,
                         IsOwnerMixin, UpdateView):
-
     def get_success_url(self):
         if self._object:
             return reverse('articles:detail', kwargs={'pk': self._object.id})

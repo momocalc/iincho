@@ -10,7 +10,6 @@ from .models import Tag
 
 
 class ArticleSearchMixin(object):
-
     def get_queryset(self):
 
         queryset = super(ArticleSearchMixin, self).get_queryset()
@@ -30,7 +29,6 @@ class ArticleSearchMixin(object):
 
 
 class SetTagsAndCategorizeMixin(object):
-
     def __get_category(self, name):
         try:
             return Category.objects.get(name=name)
@@ -48,10 +46,10 @@ class SetTagsAndCategorizeMixin(object):
             if category.startswith('/'):
                 category = category[1:]
 
-        if last_slash+1 >= len(text):
+        if last_slash + 1 >= len(text):
             other_text = None
         else:
-            other_text = text[last_slash+1:].strip()
+            other_text = text[last_slash + 1:].strip()
 
         return category, other_text
 
@@ -101,7 +99,6 @@ class SetTagsAndCategorizeMixin(object):
 
 
 class IsOwnerMixin(object):
-
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_superuser:
             self._object = self.get_object()
