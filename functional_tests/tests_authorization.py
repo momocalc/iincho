@@ -10,6 +10,7 @@ from selenium.common.exceptions import TimeoutException
 import time
 import os
 from core import test_utils
+from urllib.parse import urljoin
 
 
 class AuthorizationTest(StaticLiveServerTestCase):
@@ -41,10 +42,24 @@ class AuthorizationTest(StaticLiveServerTestCase):
         self.assertRegex(self.browser.current_url, '^' + self.live_server_url + '/?$')
 
     def test_login_with_id_and_wrong_pw(self):
-        # トップページにアクセスする
         # ログインページにアクセスする
+        self.browser.get(urljoin(self.live_server_url,'accounts/login'))
+        self.browser.implicitly_wait(3)
+        self.assertRegex(self.browser.current_url, '^.+accounts/login/?$')
         # ユーザIDを入力する
+        user_id_element = self.browser.find_element_by_id('id_username')
+        user_id_element.send_keys('test_user_2')
+
         # 間違ったパスワードを入力する
+        pw_element = self.browser.find_element_by_id('id_password')
+        pw_element.send_keys('password_1')
         # ログインボタンを押す
+        self.browser.find_element_by_id('normalLogin').click()
+        self.browser.implicitly_wait(3)
+        # ログインページのまま
+        self.assertRegex(self.browser.current_url, '^.+accounts/login/?$')
         # エラーメッセージが表示される
+        self.assertRegex(self.browser.find_element_by_class_name('alert-danger').text, '正しいユーザー名とパスワードを入力してください')
         pass
+
+
