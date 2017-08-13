@@ -9,19 +9,36 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import time
 import os
+from core import test_utils
 
 
 class AuthorizationTest(StaticLiveServerTestCase):
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(3)
+        test_utils.create_test_user(2)
+
+    def tearDown(self):
+        self.browser.quit()
+
     def test_login_with_id_and_pw(self):
         # トップページにアクセスする
+        self.browser.get(self.live_server_url)
+        self.browser.implicitly_wait(3)
         # ログインページにリダイレクトされる
+        self.assertRegex(self.browser.current_url, '^.+accounts/login/\?next=/$')
         # ユーザIDを入力する
-        # パスワードを入力する
-        # ログインボタンを押す
-        # ログインできる
-        # トップページにリダイレクトされる
+        user_id_element = self.browser.find_element_by_id('id_username')
+        user_id_element.send_keys('test_user_1')
 
-        pass
+        # パスワードを入力する
+        pw_element = self.browser.find_element_by_id('id_password')
+        pw_element.send_keys('password_1')
+        # ログインボタンを押す
+        self.browser.find_element_by_id('normalLogin').click()
+        # トップページにリダイレクトされる
+        self.browser.implicitly_wait(3)
+        self.assertRegex(self.browser.current_url, '^' + self.live_server_url + '/?$')
 
     def test_login_with_id_and_wrong_pw(self):
         # トップページにアクセスする
@@ -31,4 +48,3 @@ class AuthorizationTest(StaticLiveServerTestCase):
         # ログインボタンを押す
         # エラーメッセージが表示される
         pass
-
