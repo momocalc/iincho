@@ -1,5 +1,5 @@
 # Iincho とは
-Django学習のために作成したqiitaの簡易クローン． 
+qiitaの簡易クローン．Djangoの習作．
 
 ## DEMO
 [DEMOサイト](http://iin-cho.herokuapp.com/)  
@@ -19,11 +19,11 @@ Django学習のために作成したqiitaの簡易クローン．
 ## 環境変数 or .env
 | key                         | value                                  |
 |-----------------------------|----------------------------------------|
-| IINCHO_SECRET_KEY           | Djangoで使うseacret_keyです            |
-| DEBUG                       | debug modeの設定です.  1:debug mode ON |
-| GOOGLE_OAUTH2_CLIENT_ID     | google oauthのclient_idです            |
-| GOOGLE_OAUTH2_CLIENT_SECRET | google oauthのclient_secretです        |
-| DEMO                        | demo modeの設定です．  1:demo mode ON   |
+| IINCHO_SECRET_KEY           | Djangoで使う. seacret_key|
+| DEBUG                       | debug modeの設定.  1:debug mode ON |
+| GOOGLE_OAUTH2_CLIENT_ID     | google oauthのclient_id|
+| GOOGLE_OAUTH2_CLIENT_SECRET | google oauthのclient_secret|
+| DEMO                        | demo modeの設定． 1:demo mode ON   |
 
 ## demo mode
 Iinchoはグーグルアカウントでログインすることを前提としていますが，  
@@ -37,5 +37,3 @@ Iinchoはグーグルアカウントでログインすることを前提とし�
     * [highlight.js](http://softwaremaniacs.org/soft/highlight/en/)
     * [js-deflate](https://github.com/dankogai/js-deflate)
 * [jQuery-File-Upload](https://github.com/blueimp/jQuery-File-Upload)
-
-
