@@ -2,16 +2,22 @@
 
 {% block content %}
     <h1>ログイン</h1>
-        <div style="margin:20px 0;">
+    <div class="row">
+        <div class="col-md-6">
             <form method="post">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                 {{ form|bootstrap }}
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">login</button>
+                    <button id="normalLogin" type="submit" class="btn btn-primary">login</button>
                 </div>
             </form>
         </div>
-        <div>
-            <a id="a_login" href="{{ url('social:begin','google-oauth2') }}">Login with Google</a>
+        <div class="col-md-6">
+            <div class="text-center">
+            <h2>外部アカウントでログイン</h2>
+                <a id="googleLogin" class="btn btn-primary" href="{{ url('social:begin','google-oauth2') }}">Login with
+                    Google</a>
+            </div>
         </div>
+    </div>
 {% endblock %}
