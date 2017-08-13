@@ -23,12 +23,7 @@ qiitaの簡易クローン．Djangoの習作．
 | DEBUG                       | debug modeの設定.  1:debug mode ON |
 | GOOGLE_OAUTH2_CLIENT_ID     | google oauthのclient_id|
 | GOOGLE_OAUTH2_CLIENT_SECRET | google oauthのclient_secret|
-| DEMO                        | demo modeの設定． 1:demo mode ON   |
 
-## demo mode
-Iinchoはグーグルアカウントでログインすることを前提としていますが，  
-デモモードの場合，ログイン画面でユーザー名とパスワードでログインできるようになります．  
-また，デモモードではファイルアップロードはできません．
 
 # エディタで利用したライブラリ
 * [Markdown-Editor](https://github.com/jbt/markdown-editor)

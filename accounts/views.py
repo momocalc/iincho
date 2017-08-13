@@ -22,7 +22,6 @@ class LoginView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super(LoginView, self).get_context_data(**kwargs)
-        context['DEMO'] = settings.DEMO
         return context
 
     def form_valid(self, form):

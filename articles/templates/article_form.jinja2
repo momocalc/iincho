@@ -62,7 +62,6 @@
                     </div>
                 </div>
             </form>
-            {% if not DEMO %}
             <div class="uploader">
                 <div>
                     <span class="fileinput-button">
@@ -71,7 +70,6 @@
                     </span>
                 </div>
             </div>
-            {% endif %}
         </div>
 
         <div class="col-md-6 hidden-sm hidden-xs" style="height:100%">
@@ -124,9 +122,7 @@
 
             // Change this to the location of your server-side upload handler:
             var url='';
-            {% if not DEMO %}
             url = '{{ url('attachments:upload_file_jq') }}';
-            {% endif %}
             $('#fileupload').fileupload({
                 timeout: 20000,
                 url: url,

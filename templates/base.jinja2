@@ -61,7 +61,7 @@
                                 </li>
                             </ul>
                         </li>
-                    {% elif not DEMO %}
+                    {% else %}
                         <li>
                             <a id="a_login" href="{{ url('social:begin','google-oauth2') }}">Login with Google</a>
                         </li>
