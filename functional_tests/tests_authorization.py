@@ -43,7 +43,7 @@ class AuthorizationTest(StaticLiveServerTestCase):
 
     def test_login_with_id_and_wrong_pw(self):
         # ログインページにアクセスする
-        self.browser.get(urljoin(self.live_server_url,'accounts/login'))
+        self.browser.get(urljoin(self.live_server_url, 'accounts/login'))
         self.browser.implicitly_wait(3)
         self.assertRegex(self.browser.current_url, '^.+accounts/login/?$')
         # ユーザIDを入力する
@@ -60,6 +60,5 @@ class AuthorizationTest(StaticLiveServerTestCase):
         self.assertRegex(self.browser.current_url, '^.+accounts/login/?$')
         # エラーメッセージが表示される
         self.assertRegex(self.browser.find_element_by_class_name('alert-danger').text, '正しいユーザー名とパスワードを入力してください')
-        pass
 
-
+## フレームワーク提供の認証処理を使用しているため，# IDだけ未入力，PWだけ未入力などのパターンは省略する。
