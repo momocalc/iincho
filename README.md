@@ -7,7 +7,8 @@ qiitaの簡易クローン．Djangoの習作．
 
 # 設定
 ## 環境変数 or .env
-| key                         | value                      |            |
+
+| key                         | value                      |
 |-----------------------------|----------------------------------------|
 | IINCHO_SECRET_KEY           | Djangoで使う. seacret_key|
 | DEBUG                       | debug modeの設定.  1:debug mode ON |
