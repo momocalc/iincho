@@ -61,4 +61,4 @@ class AuthorizationTest(StaticLiveServerTestCase):
         # エラーメッセージが表示される
         self.assertRegex(self.browser.find_element_by_class_name('alert-danger').text, '正しいユーザー名とパスワードを入力してください')
 
-## フレームワーク提供の認証処理を使用しているため，# IDだけ未入力，PWだけ未入力などのパターンは省略する。
+## フレームワーク提供の認証処理を使用しているため，IDだけ未入力，PWだけ未入力などのパターンは省略する。
