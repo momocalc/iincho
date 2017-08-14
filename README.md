@@ -1,23 +1,13 @@
 # Iincho とは
 qiitaの簡易クローン．Djangoの習作．
 
-## DEMO
-[DEMOサイト](http://iin-cho.herokuapp.com/)  
-**DEMOではファイルアップロードは出来ません**
-
-### デモ用アカウント
-| ユーザー名 | パスワード |
-|------------|------------|
-| test       | passwd     |
-
-
 # 環境
 + Django:1.8
 + python:3.5
 
 # 設定
 ## 環境変数 or .env
-| key                         | value                                  |
+| key                         | value                      |            |
 |-----------------------------|----------------------------------------|
 | IINCHO_SECRET_KEY           | Djangoで使う. seacret_key|
 | DEBUG                       | debug modeの設定.  1:debug mode ON |
