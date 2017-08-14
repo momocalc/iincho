@@ -22,6 +22,7 @@ class AuthorizationTest(StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
+    ## フレームワーク提供の認証処理を使用しているため，IDだけ未入力，PWだけ未入力などのパターンは省略する。
     def test_login_with_id_and_pw(self):
         # トップページにアクセスする
         self.browser.get(self.live_server_url)
@@ -61,4 +62,92 @@ class AuthorizationTest(StaticLiveServerTestCase):
         # エラーメッセージが表示される
         self.assertRegex(self.browser.find_element_by_class_name('alert-danger').text, '正しいユーザー名とパスワードを入力してください')
 
-## フレームワーク提供の認証処理を使用しているため，IDだけ未入力，PWだけ未入力などのパターンは省略する。
+
+class GoogleAuthorizationTest(StaticLiveServerTestCase):
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(3)
+        test_utils.create_test_user(2)
+
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_google_login(self):
+        # ログインページにアクセスする
+        self.browser.get(urljoin(self.live_server_url, 'accounts/login'))
+        self.browser.implicitly_wait(3)
+        # Googleログインボタンを押す
+        self.browser.find_element_by_id('googleLogin').click()
+        self.browser.implicitly_wait(3)
+        google_login = GoogleLogin(self.browser)
+        self.assertTrue(google_login.login())
+
+
+class GoogleLogin(object):
+    '''
+    webDriverでGoogleログインを行う
+    '''
+
+    def __init__(self, browser):
+        self.browser = browser
+
+    def __approve_if_hasnt_approved(self):
+
+        delay = 5
+        try:
+            WebDriverWait(self.browser, delay).until(
+                EC.presence_of_element_located((By.ID, 'submit_approve_access')))
+
+            approve = self.browser.find_element_by_id('submit_approve_access')
+
+            # wait to enable approve button
+            for i in range(5):
+                if approve.is_enabled():
+                    approve.click()
+                    break
+                else:
+                    time.sleep(1)
+
+        except TimeoutException:
+            pass
+
+    def _login_with_google(self, email, passwd):
+        '''
+        Googleアカウントでログイン
+        アカウント，パスワードの正当性は確認しない．
+        :param email: gmail account
+        :param passwd: gmail password
+        :return: None
+        '''
+
+        delay = 3
+        try:
+            WebDriverWait(self.browser, delay).until(
+                EC.title_contains('Google'))
+
+            email_elem = self.browser.find_element_by_id('identifierId')
+            email_elem.send_keys(email)
+            self.browser.find_element_by_id('identifierNext').click()
+            self.browser.implicitly_wait(2)
+            passwd_elem = self.browser.find_element_by_name('password')
+            passwd_elem.send_keys(passwd)
+            self.browser.find_element_by_id('passwordNext').click()
+            self.__approve_if_hasnt_approved()
+
+        except TimeoutException:
+            print("took too much time to login with Google")
+
+    def login(self):
+        # googleのログインをする
+        google_id = os.environ.get('TEST_GOOGLE_ID')
+        google_pw = os.environ.get('TEST_GOOGLE_PASSWD')
+        self._login_with_google(google_id, google_pw)
+
+        delay = 3
+        try:
+            WebDriverWait(self.browser, delay).until(
+                EC.title_contains('Iincho'))
+            return True
+
+        except TimeoutException:
+            return False
