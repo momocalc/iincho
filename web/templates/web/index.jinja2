@@ -10,7 +10,14 @@
         <div class="col-md-9">
             <div class="list_header">
                 {% if path %}
-                    <h2>{{ path }} の投稿一覧</h2>
+                    <div class="row row-eq-height">
+                        <div class="col-md-8">
+                            <h2>{{ path }} の投稿一覧</h2>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url('articles:create')}}?path={{ request.GET.get('path') | iriencode}}" class="btn btn-default">このカテゴリに投稿</a>
+                        </div>
+                    </div>
                 {% else %}
                     <h2>新着投稿一覧</h2>
                 {% endif %}
