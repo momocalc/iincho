@@ -87,6 +87,16 @@ class ArticleEditMixin(object):
 
 
 class ArticleCreateView(LoginRequiredMixin, ArticleEditMixin, SetTagsAndCategorizeMixin, CreateView):
+    def get_initial(self):
+        data = super(ArticleCreateView, self).get_initial()
+
+        path = self.request.GET.get('path')  # type:str
+        if path:
+            if not path.endswith('/'):
+                path += '/'
+            data['title'] = path
+        return data
+
     def get_success_url(self):
         return reverse('articles:detail', kwargs={'pk': self.object.id})
 
