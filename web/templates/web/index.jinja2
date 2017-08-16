@@ -11,11 +11,13 @@
             <div class="list_header">
                 {% if path %}
                     <div class="row row-eq-height">
-                        <div class="col-md-8">
+                        <div class="col-md-9">
                             <h2>{{ path }} の投稿一覧</h2>
                         </div>
-                        <div class="col-md-4">
-                            <a href="{{ url('articles:create')}}?path={{ request.GET.get('path') | iriencode}}" class="btn btn-default">このカテゴリに投稿</a>
+                        <div class="col-md-3">
+                            <div class="flex-v-center pull-right">
+                                <a href="{{ url('articles:create')}}?path={{ request.GET.get('path') | urlencode}}" class="btn btn-default">このカテゴリに投稿</a>
+                            </div>
                         </div>
                     </div>
                 {% else %}
