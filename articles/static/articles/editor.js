@@ -1,25 +1,24 @@
-
 var URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 navigator.saveBlob = navigator.saveBlob || navigator.msSaveBlob || navigator.mozSaveBlob || navigator.webkitSaveBlob;
 window.saveAs = window.saveAs || window.webkitSaveAs || window.mozSaveAs || window.msSaveAs;
 
-$(function(){
-    function editor_adjust(){
+$(function () {
+    function editor_adjust() {
         var h = $(window).height(); //ウィンドウの高さ
-        var h1= $('#top-nav').height() + $('.editor-header').height() + $('.editor-footer').height(); //他要素の高さ
+        var h1 = $('#top-nav').height() + $('.editor-header').height() + $('.editor-footer').height(); //他要素の高さ
         var margin = 40;
         h1 = h1 + margin;
-        $('.editor-textarea').css('height', h-h1); //可変部分の高さを適用
+        $('.editor-textarea').css('height', h - h1); //可変部分の高さを適用
     }
 
     editor_adjust();
 
-    $(window).on('resize', function(){
+    $(window).on('resize', function () {
         editor_adjust();
     });
 
     // title-change-event
-    $("#article-title").change(function(){
+    $("#article-title").change(function () {
         $("#title-out").text($(this).val());
     });
     $("#title-out").text($("#article-title").val());
@@ -29,7 +28,7 @@ $(function(){
 
 var hashto;
 
-function update(e){
+function update(e) {
     setOutput(e.getValue());
 
     clearTimeout(hashto);
@@ -37,7 +36,7 @@ function update(e){
 }
 
 var md = new markdownRender();
-function setOutput(val){
+function setOutput(val) {
 
     var out = document.getElementById('out');
     var old = out.cloneNode(true);
@@ -72,8 +71,8 @@ var editor = CodeMirror.fromTextArea(document.getElementById('article-code'), {
 editor.on('change', update);
 
 //key event
-document.addEventListener('keydown', function(e){
-    if(e.keyCode == 83 && (e.ctrlKey || e.metaKey)){ //cmd + S
+document.addEventListener('keydown', function (e) {
+    if (e.keyCode == 83 && (e.ctrlKey || e.metaKey)) { //cmd + S
         // e.shiftKey ? showMenu() : saveAsMarkdown();
 
         e.preventDefault();
@@ -87,7 +86,7 @@ document.addEventListener('keydown', function(e){
 //      }
 });
 
-function updateHash(){
+function updateHash() {
     window.location.hash = btoa( // base64 so url-safe
         RawDeflate.deflate( // gzip
             unescape(encodeURIComponent( // convert to utf8
@@ -97,12 +96,12 @@ function updateHash(){
     );
 }
 
-if(window.location.hash){
+if (window.location.hash) {
     var h = window.location.hash.replace(/^#/, '');
-    if(h.slice(0,5) == 'view:'){
+    if (h.slice(0, 5) == 'view:') {
         setOutput(decodeURIComponent(escape(RawDeflate.inflate(atob(h.slice(5))))));
         document.body.className = 'view';
-    }else{
+    } else {
         editor.setValue(
             decodeURIComponent(escape(
                 RawDeflate.inflate(
@@ -115,7 +114,7 @@ if(window.location.hash){
         update(editor);
         editor.focus();
     }
-}else {
+} else {
     update(editor);
     editor.focus();
 }

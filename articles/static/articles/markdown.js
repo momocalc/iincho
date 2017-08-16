@@ -15,7 +15,9 @@ block_comment_rule = function (state, startLine, endLine, silent) {
         max = state.eMarks[startLine];
     pos += state.tShift[startLine];
 
-    if (pos + 2 >= max) { return false; }
+    if (pos + 2 >= max) {
+        return false;
+    }
 
     ch = state.src.charCodeAt(pos);
 
@@ -23,13 +25,17 @@ block_comment_rule = function (state, startLine, endLine, silent) {
     if (ch === 0x7B/* { */) {
         // opening tag
         match = state.src.slice(pos, max).match(COMMENT_BLOCK_OPNE_RE);
-        if (!match) { return false; }
-    }else{
+        if (!match) {
+            return false;
+        }
+    } else {
         return false;
     }
     // silentがよく分かってません；；
     // おそらくvalidation modeでの動作だと思われる
-    if (silent) { return true; }
+    if (silent) {
+        return true;
+    }
 
     // search a end tag
     nextLine = startLine;
@@ -38,15 +44,16 @@ block_comment_rule = function (state, startLine, endLine, silent) {
         pos = state.bMarks[nextLine],
             max = state.eMarks[nextLine];
         if (pos + state.tShift[nextLine] + 2 <= max) {
-            if(state.src.slice(pos, max).match(COMMENT_BLOCK_CLOSE_RE)){
+            if (state.src.slice(pos, max).match(COMMENT_BLOCK_CLOSE_RE)) {
                 nextLine++;
-                break; }
+                break;
+            }
         }
     }
 
     state.line = nextLine;
-    token         = state.push('comment_block', '', 0);
-    token.map     = [ startLine, state.line ];
+    token = state.push('comment_block', '', 0);
+    token.map = [startLine, state.line];
     token.content = state.getLines(startLine, nextLine, 0, true);
 
     return true;
@@ -82,7 +89,7 @@ inline_comment_rule = function (state, silent) {
  */
 var comment_render_rule;
 comment_render_rule = function (tokens, idx, options, env, self) {
-    return  '';
+    return '';
 };
 
 
@@ -92,7 +99,7 @@ var languageOverrides = {
     html: 'xml'
 };
 
-var markdownRender = function() {
+var markdownRender = function () {
     var md =
         markdownit({
             html: false,
@@ -107,17 +114,19 @@ var markdownRender = function() {
                 }
                 return '';
             }
-            ,linkify:true
+            , linkify: true
         }).use(markdownitFootnote); //注釈機能の追加:https://www.npmjs.com/package/markdown-it-footnote
 
     //コメントルールの追加
-    md.block.ruler.after('fence', 'comment_block',block_comment_rule);
-    md.inline.ruler.after('image', 'comment_block',inline_comment_rule);
+    md.block.ruler.after('fence', 'comment_block', block_comment_rule);
+    md.inline.ruler.after('image', 'comment_block', inline_comment_rule);
     md.renderer.rules.comment_block = comment_render_rule;
 
-    markdownRender.prototype.render = function(val){
-        if (!md){ return ""; }
-        val = val.replace(/<equation>((.*?\n)*?.*?)<\/equation>/ig, function(a, b){
+    markdownRender.prototype.render = function (val) {
+        if (!md) {
+            return "";
+        }
+        val = val.replace(/<equation>((.*?\n)*?.*?)<\/equation>/ig, function (a, b) {
             return '<img src="http://latex.codecogs.com/png.latex?' + encodeURIComponent(b) + '" />';
         }); //LaTeX変換
         return md.render(val);
