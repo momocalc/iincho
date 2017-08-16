@@ -24,7 +24,12 @@ $(function(){
     });
     $("#title-out").text($("#article-title").val());
 
-    $("#article-title").focus();
+    var title = $("#article-title");
+    title.focus();
+    console.log(title[0].createTextRange);
+    if (title[0].value.length) {
+        title[0].selectionStart = title[0].value.length;
+    }
 });
 
 var hashto;
