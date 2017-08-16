@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'^attachments/', include(attachments.urls, namespace='attachments')),
 ]
 
-if settings.DEBUG or settings.DEMO:
+if settings.DEBUG :
     urlpatterns += patterns(
         '', url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
             'document_root': settings.MEDIA_ROOT,

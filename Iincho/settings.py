@@ -27,9 +27,6 @@ SECRET_KEY = os.environ.get('IINCHO_SECRET_KEY')
 DEBUG = os.environ.get('DEBUG') == '1'
 ALLOWED_HOSTS = ['*']
 
-# demo mode
-DEMO = os.environ.get('DEMO') == '1'
-
 # Application definition
 
 INSTALLED_APPS = (

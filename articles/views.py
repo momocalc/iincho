@@ -69,10 +69,6 @@ class ArticleEditMixin(object):
     template_name = 'article_form.jinja2'
     form_class = ArticleForm
 
-    def get_context_data(self, **kwargs):
-        context_data = super(ArticleEditMixin, self).get_context_data(**kwargs)
-        context_data['DEMO'] = settings.DEMO
-        return context_data
 
     def get_form(self, form_class=None):
         form = super(ArticleEditMixin, self).get_form()
