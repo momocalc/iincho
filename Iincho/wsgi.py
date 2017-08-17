@@ -12,7 +12,8 @@ import dotenv
 
 from django.core.wsgi import get_wsgi_application
 
-dotenv.read_dotenv()
+env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+dotenv.read_dotenv(env_file)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Iincho.settings")
 
 application = get_wsgi_application()
