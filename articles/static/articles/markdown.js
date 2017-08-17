@@ -127,7 +127,8 @@ var markdownRender = function () {
             return "";
         }
         val = val.replace(/<equation>((.*?\n)*?.*?)<\/equation>/ig, function (a, b) {
-            return '<img src="http://latex.codecogs.com/png.latex?' + encodeURIComponent(b) + '" />';
+            var equation = encodeURIComponent(b);
+            return '![' + equation + '](http://latex.codecogs.com/png.latex?' + equation + ")";
         }); //LaTeX変換
         return md.render(val);
     };
