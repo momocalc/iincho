@@ -43,7 +43,7 @@
         <div class="article_tags">
             <ul>
             {% for tag in tags %}
-                <li class="li_tag"><a href="{{ url('articles:list') }}?tag={{ tag.name | iriencode }}">{{ tag.name }}</a></li>
+                <li class="li_tag"><a href="{{ url('articles:list') }}?tag={{ tag.name | urlencode }}">{{ tag.name }}</a></li>
             {% endfor %}
             </ul>
         </div>

@@ -18,7 +18,7 @@
                         {% set c_link = '' %}
                         {% for c_name in article.category.name.split('/') %}
                             {% set c_link = c_name if not c_link else (c_link + '/'+ c_name) %}
-                            <li class="li_category"><a href="{{ url('index') }}?path={{ c_link | iriencode}}">{{ c_name }}</a></li>
+                            <li class="li_category"><a href="{{ url('index') }}?path={{ c_link | urlencode }}">{{ c_name }}</a></li>
                         {% endfor %}
                         </ul>
                     </div>
@@ -29,7 +29,7 @@
                 </h3>
                 <div class="article_tags">
                     {% for tag in article.tags %}
-                        <li class="li_tag"><a href="{{ url('articles:list') }}?query=%23{{tag.name | iriencode }}">{{ tag.name }}</a></li>
+                        <li class="li_tag"><a href="{{ url('articles:list') }}?query=%23{{tag.name | urlencode }}">{{ tag.name }}</a></li>
                     {% endfor %}
                 </div>
             </div>
