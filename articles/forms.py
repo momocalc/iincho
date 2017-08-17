@@ -13,6 +13,7 @@ class ArticleForm(forms.ModelForm):
     )
 
     body = forms.CharField(
+        label='article-body',
         widget=forms.Textarea(
             attrs={'id': 'article-code', }
         )
