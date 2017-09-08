@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from .models import Category
 import urllib.parse
@@ -9,18 +9,13 @@ class Node(object):
     category tree node
     """
 
-    def __init__(self, parent_path, name):
+    def __init__(self, name, parent=None):
         self.is_route = False
         self.children = []
         self.name = name
         self.count = 0
         self.sort_number = 0
-        self.path = ""
-
-        if parent_path:
-            self.path = parent_path + '/' + name
-        elif name:
-            self.path = name
+        self.parent = parent
 
     def __getattr__(self, item):
         if item == 'encoded_path':
@@ -28,6 +23,14 @@ class Node(object):
 
         if item == 'sorted_children':
             return sorted(self.children, key=lambda x: (x.sort_number, x.name))
+
+        if item == 'path':
+            if self.parent:
+                return self.parent.path + self.name + '/'
+            elif self.name:
+                return self.name + '/'
+            else:
+                return ''
 
     def __str__(self):
         if not self.children:
@@ -40,20 +43,25 @@ class Node(object):
         return res
 
 
-def split_path(category):
+def split_nodes(full_cate_name: str) -> List[Node]:
+    """
+    カテゴリ名からノードリストを作成
+    :param full_cate_name: カテゴリ名(ex: foo/var/hoge/)
+    :return: ルートからのノードのリスト
+    """
     result = []
     p = None
-    for level in category.split('/'):
+    for level in full_cate_name.split('/'):
         if level:
-            n = Node(p, level)
+            n = Node(level, parent=p)
             result.append(n)
-            p = n.path
+            p = n
 
     return result
 
 
-def __get_level_name(level: int, name: str) -> Optional[str]:
-    s = name.split('/')
+def __get_level_name(level: int, full_cate_name: str) -> Optional[str]:
+    s = full_cate_name.split('/')
     if level >= len(s):
         return None
     if not s[level]:
@@ -62,10 +70,10 @@ def __get_level_name(level: int, name: str) -> Optional[str]:
 
 
 def __is_leaf(level: int, name: str) -> bool:
-    return level == name.count('/')
+    return level == name.count('/') - 1
 
 
-def __make_tree(parent, category, level):
+def __make_tree(parent: Node, category: Category, level: int):
     cat_name = __get_level_name(level, category.name)
     if not cat_name:
         return
@@ -75,17 +83,22 @@ def __make_tree(parent, category, level):
     if tmp_list:
         node = tmp_list[0]
     else:
-        node = Node(parent.path, cat_name)
+        node = Node(cat_name, parent=parent)
         parent.children.append(node)
-        if __is_leaf(level, cat_name):
+        if __is_leaf(level, category.name):
             node.sort_number = category.sort_number
 
     node.count += category.num_articles
     __make_tree(node, category, level + 1)
 
 
-def category_tree(categories):
-    root = Node('', '')
+def category_tree(categories: List[Category]) -> List[Node]:
+    """
+    カテゴリのリストをノードリスト(木構造)に変換する
+    :param categories:
+    :return:
+    """
+    root = Node('')
     for category in categories:
         __make_tree(root, category, 0)
     return root

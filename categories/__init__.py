@@ -1,1 +1,1 @@
-NOT_CATEGORISED = '(not categorised)'
+NOT_CATEGORISED = '(not categorised)/'

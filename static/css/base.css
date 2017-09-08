@@ -52,13 +52,13 @@ div.list_header {
     color: #5e5e5e;
 }
 
-.article_category li.li_category:first-child:before {
+.article_category ul li:first-child:before {
     padding: 0 0;
     content: "/\00a0";
     color: #5e5e5e;
 }
 
-.article_category li.li_category:after {
+.article_category ul li:after {
     padding: 0 0;
     content: "\00a0/";
     color: #5e5e5e;

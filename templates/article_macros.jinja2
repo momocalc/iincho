@@ -1,4 +1,5 @@
 {% import "basic_macros.jinja2" as bas_macro with context %}
+{% import "categories/macros.jinja2" as c_macro %}
 {% macro article_list() -%}
 
 <div class="articles">
@@ -14,13 +15,7 @@
                         {{ article.created | datetimeformat('%Y/%m/%d') }}
                     </div>
                     <div class="article_category">
-                        <ul>
-                        {% set c_link = '' %}
-                        {% for c_name in article.category.name.split('/') %}
-                            {% set c_link = c_name if not c_link else (c_link + '/'+ c_name) %}
-                            <li class="li_category"><a href="{{ url('index') }}?path={{ c_link | urlencode }}">{{ c_name }}</a></li>
-                        {% endfor %}
-                        </ul>
+                        {{ c_macro.make_nodes_link(article.category.name) }}
                     </div>
 
                 </div>

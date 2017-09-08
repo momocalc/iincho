@@ -36,9 +36,9 @@
     },
 {% endmacro %}
 
-{% macro make_category_breadcrumb(name) -%}
-    <ul class="breadcrumb">
-    {% for node in (name | split_category_path) %}
+{% macro make_nodes_link(full_cate_name, ul_class='') -%}
+    <ul class="{{ ul_class }}">
+    {% for node in (full_cate_name | split_category_nodes) %}
         <li>
             <a href="{{ url('index') }}?path={{ node.encoded_path }}">{{ node.name }}</a>
         </li>
