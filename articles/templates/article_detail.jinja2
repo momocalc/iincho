@@ -21,7 +21,7 @@
     {% endif %}
     <div class="article_header">
         <div class="category_list">
-            {{ c_macro.make_category_breadcrumb(article.category.name) }}
+            {{ c_macro.make_nodes_link(article.category.name, 'breadcrumb') }}
         </div>
 
         <div class="pull-right">
