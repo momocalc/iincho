@@ -32,7 +32,7 @@ def __rebuild_edit_title(title, category, tags=None):
 
         result = title
     else:
-        result = category + '/' + title
+        result = category + title
 
     if not tags:
         return result
