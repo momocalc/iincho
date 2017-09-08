@@ -89,7 +89,7 @@ TEMPLATES = [
                 "min": "core.filters.minimum",
                 "datetimeformat": "core.filters.datetimeformat",
                 "category_tree": "categories.filters.category_tree",
-                "split_category_path": "categories.filters.split_path",
+                "split_category_nodes": "categories.filters.split_nodes",
                 "remove_param_str": "core.filters.remove_param_str",
             },
 
