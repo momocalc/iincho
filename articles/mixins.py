@@ -42,7 +42,7 @@ class SetTagsAndCategorizeMixin(object):
         if last_slash < 1:
             category = categories.NOT_CATEGORISED
         else:
-            category = text[:last_slash]
+            category = text[:last_slash + 1]
             if category.startswith('/'):
                 category = category[1:]
 
