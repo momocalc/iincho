@@ -1,3 +1,8 @@
+from braces.views import LoginRequiredMixin
+from django.views.generic.base import TemplateResponseMixin, TemplateView
+from django.views.generic.edit import ProcessFormView
+from django.views.decorators.http import require_POST, require_GET
+
 from .models import Category
 from django.db.models import Count
 
@@ -9,3 +14,7 @@ class CategoryListViewMixin(object):
             num_articles=Count('article')
         ).filter(num_articles__gt=0).order_by('name')
         return context
+
+
+class CategoryListUpdateView(LoginRequiredMixin, CategoryListViewMixin, TemplateView, ProcessFormView):
+    template_name = 'categories/category_list_edit.jinja2'

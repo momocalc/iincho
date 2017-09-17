@@ -19,6 +19,7 @@ from django.contrib import admin
 import articles.urls
 import accounts.urls
 import attachments.urls
+import categories.urls
 import web.urls
 
 urlpatterns = [
@@ -29,6 +30,7 @@ urlpatterns = [
     url(r'^articles/', include(articles.urls, namespace='articles')),
     url(r'^accounts/', include(accounts.urls, namespace='accounts')),
     url(r'^attachments/', include(attachments.urls, namespace='attachments')),
+    url(r'^categories/', include(categories.urls, namespace='categories')),
 ]
 
 if settings.DEBUG :
