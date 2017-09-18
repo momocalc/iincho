@@ -24,26 +24,22 @@
     <script>
         {{ ajax_macro.django_ajax_init() }}
 
+        var deleteNode;
+        var treeHelper;
+
         // deleteConfirm 設定
         var deleteConfirm = $('#delete_confirm');
         deleteConfirm.find('.modal-message').html('このカテゴリ配下の記事は、すべて「カテゴリなし」の状態になります。(記事自体は削除されません)<br />カテゴリを削除しますか？');
         deleteConfirm.find('.modal-submit').click(deleteCategory);
-        var deleteNode;
-
-        function getData() {
-            var tree = {{ catecro.make_category_tree(None, False) }};
-            return tree;
-        }
-        var helper;
 
         $(function () {
-            helper = new TreeViewHelper($('#treeview'), getData());
-            helper.handler.onMovingNode = function (target_node, new_parent_node) {
-                var target_path = helper.getPath(target_node);
-                var new_parent_path = helper.getPath(new_parent_node);
+            treeHelper = new TreeViewHelper($('#treeview'), {{ catecro.make_category_tree(None, False) }});
+            treeHelper.handler.onMovingNode = function (target_node, new_parent_node) {
+                var target_path = treeHelper.getPath(target_node);
+                var new_parent_path = treeHelper.getPath(new_parent_node);
                 return movePath(target_path, new_parent_path);
             };
-            helper.handler.onClickedDeleteNode = function (node) {
+            treeHelper.handler.onClickedDeleteNode = function (node) {
                 deleteNode = node;
                 //モーダル表示
                 deleteConfirm.modal('show');
@@ -83,7 +79,7 @@
          * カテゴリの削除
          */
         function deleteCategory() {
-            var targetPath = helper.getPath(deleteNode);
+            var targetPath = treeHelper.getPath(deleteNode);
 
             $.ajax({
                 type: 'POST',
@@ -95,7 +91,7 @@
             }).done(function (data) {
                 console.log(data);
                 if (data['state'] === true) {
-                    helper.deleteNode(deleteNode);
+                    treeHelper.deleteNode(deleteNode);
                 } else {
                     alert(data['message']);
                 }

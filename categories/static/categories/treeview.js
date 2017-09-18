@@ -51,7 +51,7 @@ var TreeViewHelper = function ($treeView, treeData) {
 
         $treeView.treeview({
                 data: [{text: "root", name: "", nodes: treeData}],
-
+                levels: 3,
                 onTreeRendered: function () {
                     var $draggableNode;
                     var nodeHeight = 40;
@@ -182,7 +182,7 @@ var TreeViewHelper = function ($treeView, treeData) {
         }
     }
 
-    this.deleteNode = function(node) {
+    this.deleteNode = function (node) {
         var nodeId = node.nodeId;
         _this.treeview('removeNode', nodeId);
     }
