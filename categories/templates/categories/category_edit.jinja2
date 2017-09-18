@@ -1,7 +1,7 @@
 {% extends "base.jinja2" %}
 {% import "categories/macros.jinja2" as catecro with context %}
 {% import "ajax_macros.jinja2" as ajax_macro %}
-{#{% import "article_macros.jinja2" as articro with context %}#}
+{% import "basic_macros.jinja2" as b_macro with context %}
 
 {% block content %}
 
@@ -9,6 +9,9 @@
         <div id="treeview" class="treeview">
         </div>
     </div>
+
+    {# 削除モーダル #}
+    {{ b_macro.confirm_modal(modal_id='delete_confirm', btn_class="btn-danger") }}
 {% endblock %}
 
 {% block body_script %}
@@ -21,11 +24,17 @@
     <script>
         {{ ajax_macro.django_ajax_init() }}
 
+        // deleteConfirm 設定
+        var deleteConfirm = $('#delete_confirm');
+        deleteConfirm.find('.modal-message').html('このカテゴリ配下の記事は、すべて「カテゴリなし」の状態になります。(記事自体は削除されません)<br />カテゴリを削除しますか？');
+        deleteConfirm.find('.modal-submit').click(deleteCategory);
+        var deleteNode;
+
         function getData() {
             var tree = {{ catecro.make_category_tree(None, False) }};
             return tree;
         }
-        var helper ;
+        var helper;
 
         $(function () {
             helper = new TreeViewHelper($('#treeview'), getData());
@@ -33,6 +42,11 @@
                 var target_path = helper.getPath(target_node);
                 var new_parent_path = helper.getPath(new_parent_node);
                 return movePath(target_path, new_parent_path);
+            };
+            helper.handler.onClickedDeleteNode = function (node) {
+                deleteNode = node;
+                //モーダル表示
+                deleteConfirm.modal('show');
             };
         });
 
@@ -50,7 +64,7 @@
                 data: {'target_path': targetPath, 'new_parent_path': newParentPath},
                 dataType: 'json',
                 timeout: 10000,
-                async: false // TODO:とりあえず非同期にしている。非同期で、サーバーレスポンスを得られるまで待機するようなしくみにできれば尚良。
+                async: false // TODO:とりあえず非同期にしている。非同期で、サーバーレスポンスを得られるまで待機するようなしくみにできれば尚良。(他のjsonメソッドも同様)
             }).done(function (data) {
                 console.log(data);
                 if (data['state'] === true) {
@@ -63,6 +77,33 @@
                 showErrorAndReload();
             });
             return res;
+        }
+
+        /**
+         * カテゴリの削除
+         */
+        function deleteCategory() {
+            var targetPath = helper.getPath(deleteNode);
+
+            $.ajax({
+                type: 'POST',
+                url: '{{ url('categories:delete_category') }}',
+                data: {'target_path': targetPath},
+                dataType: 'json',
+                timeout: 10000,
+                async: false
+            }).done(function (data) {
+                console.log(data);
+                if (data['state'] === true) {
+                    helper.deleteNode(deleteNode);
+                } else {
+                    alert(data['message']);
+                }
+            }).fail(function () {
+                console.log(arguments);
+                showErrorAndReload();
+            });
+            deleteConfirm.modal('hide');
         }
 
         function showErrorAndReload() {

@@ -6,6 +6,7 @@ from django.http import JsonResponse
 
 from categories import NOT_CATEGORISED
 from .models import Category
+from articles.models import Article
 from django.db.models import Count, Q
 
 
@@ -22,9 +23,9 @@ class CategoryListUpdateView(LoginRequiredMixin, TemplateView, ProcessFormView):
     def get_context_data(self, **kwargs):
         context = super(CategoryListUpdateView, self).get_context_data(**kwargs)
         context['category_list'] = Category.objects.filter(
-            ~Q(name__startswith='template/'), ~Q(name__startswith=NOT_CATEGORISED))\
+            ~Q(name__startswith='template/'), ~Q(name__startswith=NOT_CATEGORISED)) \
             .annotate(num_articles=Count('article')
-        ).order_by('name')
+                      ).order_by('name')
         return context
 
     template_name = 'categories/category_edit.jinja2'
@@ -68,5 +69,24 @@ def move_category(request):
     for obj in Category.objects.filter(name__startswith=target).all():
         obj.name = obj.name.replace(target, new_name)
         obj.save()
+
+    return JsonResponse({'state': True})
+
+
+def delete_category(request):
+    """
+    カテゴリ削除
+    :param request:
+    :return:
+    """
+    target = request.POST.get('target_path')  # type:str
+
+    # 記事のcategoryの変更
+    not_cat = Category.objects.get(name=NOT_CATEGORISED)
+    articles = Article.objects.select_related('category').filter(category__name__startswith=target)
+    articles.update(category=not_cat)
+
+    # カテゴリ削除
+    Category.objects.filter(name__startswith=target).delete()
 
     return JsonResponse({'state': True})

@@ -6,12 +6,19 @@
  */
 var TreeViewHelper = function ($treeView, treeData) {
     var _this = this;
+
+    /**
+     * Event handlers
+     */
     this.handler = {
         onMovingNode: function () {
             return true;
         },
         onMovedNode: function () {
             return true;
+        },
+        onClickedDeleteNode: function () {
+
         }
     };
 
@@ -30,7 +37,7 @@ var TreeViewHelper = function ($treeView, treeData) {
      */
     this.getPath = function (node) {
         var path = '';
-        while (node.parentId !== undefined) {
+        while (node['parentId'] !== undefined) {
             path = node.name + '/' + path;
             node = $treeView.treeview('getParent', node.nodeId);
         }
@@ -39,6 +46,9 @@ var TreeViewHelper = function ($treeView, treeData) {
 
     function build() {
         var isSuccessDropped; // ドロップでの移動成功フラグ
+
+        addDropDownMenu(treeData); // ドロップダウンメニューの追加
+
         $treeView.treeview({
                 data: [{text: "root", name: "", nodes: treeData}],
 
@@ -140,5 +150,41 @@ var TreeViewHelper = function ($treeView, treeData) {
     }
 
     build();
-};
 
+    function addDropDownMenu(treeData) {
+        var dropdownMenu = [
+            {
+                key: 'editName',
+                text: '名称変更',
+                action: clickedDropDownButton
+            },
+            "divider",
+            {
+                key: 'delete',
+                text: '削除',
+                action: clickedDropDownButton
+            }
+        ];
+
+        function _addMenu(node) {
+            node.dropdown = jQuery.extend(true, {}, dropdownMenu);
+            if (node.hasOwnProperty('nodes')) {
+                node.nodes.forEach(_addMenu);
+            }
+        }
+
+        treeData.forEach(_addMenu);
+    }
+
+    function clickedDropDownButton(e) {
+        if (e.data.item_key === 'delete') {
+            _this.handler.onClickedDeleteNode(e.data.node);
+        }
+    }
+
+    this.deleteNode = function(node) {
+        var nodeId = node.nodeId;
+        _this.treeview('removeNode', nodeId);
+    }
+
+};
