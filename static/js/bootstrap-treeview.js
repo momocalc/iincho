@@ -17,6 +17,11 @@
  * limitations under the License.
  * ========================================================= */
 
+/*
+   @momocalc added method "moveNode", add event "treeRendered", August 9, 2017
+   @momocalc added method "setText", "addNode", "removeNode", "getTreeInfo", add dropdown menu on node, August 11, 2017
+ */
+
 ;(function ($, window, document, undefined) {
 
 	/*global jQuery, console*/
@@ -69,7 +74,8 @@
 		onNodeUnchecked: undefined,
 		onNodeUnselected: undefined,
 		onSearchComplete: undefined,
-		onSearchCleared: undefined
+		onSearchCleared: undefined,
+        onTreeRendered: undefined
 	};
 
 	_default.options = {
@@ -142,7 +148,17 @@
 
 			// Search methods
 			search: $.proxy(this.search, this),
-			clearSearch: $.proxy(this.clearSearch, this)
+			clearSearch: $.proxy(this.clearSearch, this),
+
+
+            moveNode: $.proxy(this.moveNode, this),
+			getTreeInfo: $.proxy(this.getTreeInfo,this),
+
+			// edit node
+			setText: $.proxy(this.setText, this),
+            removeNode: $.proxy(this.removeNode, this),
+            addNode: $.proxy(this.addNode, this)
+
 		};
 	};
 
@@ -199,6 +215,7 @@
 		this.$element.off('nodeUnselected');
 		this.$element.off('searchComplete');
 		this.$element.off('searchCleared');
+        this.$element.off('treeRendered');
 	};
 
 	Tree.prototype.subscribeEvents = function () {
@@ -246,6 +263,9 @@
 		if (typeof (this.options.onSearchCleared) === 'function') {
 			this.$element.on('searchCleared', this.options.onSearchCleared);
 		}
+        if (typeof (this.options.onTreeRendered) === 'function') {
+            this.$element.on('treeRendered', this.options.onTreeRendered);
+        }
 	};
 
 	/*
@@ -323,6 +343,16 @@
 		if (!node || node.state.disabled) return;
 		
 		var classList = target.attr('class') ? target.attr('class').split(' ') : [];
+
+        var isDropDownObj = false;
+        classList.forEach(function (v) {
+            if (v.startsWith('dropdown')) isDropDownObj = true;
+            if (v === 'caret') isDropDownObj = true;
+        });
+        if (isDropDownObj) {
+            return;
+        }
+
 		if ((classList.indexOf('expand-icon') !== -1)) {
 
 			this.toggleExpandedState(node, _default.options);
@@ -499,6 +529,8 @@
 
 		// Build tree
 		this.buildTree(this.tree, 0);
+
+        this.$element.trigger('treeRendered');
 	};
 
 	// Starting from the root node, and recursing down the
@@ -606,6 +638,33 @@
 				});
 			}
 
+            // Add dropdown
+            if (node.dropdown && !node.state.disabled) {
+                var dd = $(_this.template.dropdown);
+                treeItem.append(dd);
+                var ul = $(_this.template.dd_menu);
+                dd.append(ul);
+                $.each(node.dropdown, function addList(idx, val) {
+                    if (typeof val === 'string') {
+                        if (val === 'divider') {
+                            ul.append($(_this.template.dd_divider));
+                        }
+                    } else {
+                        var link = $(_this.template.dd_link).attr('href', val.href ? val.href : '#').append(val.text);
+                        //typeof (this.options.onNodeChecked) === 'function'
+                        if (typeof val.action === 'function') {
+                            link.click({
+                                item_text: val.text, item_key: val.key, node:node }, val.action);
+                        }
+                        var item = $(_this.template.dd_li).append(link);
+                        if (val.class) {
+                            item.attr('class', val.class);
+                        }
+                        ul.append(item);
+                    }
+                });
+            }
+
 			// Add item to the tree
 			_this.$wrapper.append(treeItem);
 
@@ -692,10 +751,16 @@
 		indent: '<span class="indent"></span>',
 		icon: '<span class="icon"></span>',
 		link: '<a href="#" style="color:inherit;"></a>',
-		badge: '<span class="badge"></span>'
+        badge: '<span class="badge"></span>',
+        dropdown: '<div class="dropdown pull-right"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a></div>',
+        dd_menu: '<ul class="dropdown-menu"></ul>',
+        dd_li: '<li></li>',
+        dd_link: '<a class="dropdown-item-link"></a>',
+        dd_divider: '<li class="divider"></li>'
 	};
 
-	Tree.prototype.css = '.treeview .list-group-item{cursor:pointer}.treeview span.indent{margin-left:10px;margin-right:10px}.treeview span.icon{width:12px;margin-right:5px}.treeview .node-disabled{color:silver;cursor:not-allowed}'
+    Tree.prototype.css = '.treeview .list-group-item{cursor:pointer}.treeview span.indent{margin-left:10px;margin-right:10px}.treeview span.icon{width:12px;margin-right:5px}.treeview .node-disabled{color:silver;cursor:not-allowed}';
+    Tree.prototype.css += '.treeview .dropdown .caret{border-width: 6px}';
 
 
 	/**
@@ -1206,6 +1271,130 @@
 			}
 		}
 	};
+
+    /***
+	 * Get tree
+     * @returns {Array}
+     */
+    Tree.prototype.getTreeInfo = function(){
+        return this.tree;
+    };
+
+    /**
+     * Move a node
+     * @param {Object} node_id - moved a nodeId
+     * @param {Object} base_node_id - bound for base nodeId
+     * @param {String} pos - 'above'/'below': target_elem will be moved to 'above/below' of to_elem. 'child' target_elem will be added to_elem'snodes.
+     * @return {String} target could moved - 'success': moved , 'failed': failed to move
+     */
+    Tree.prototype.moveNode = function (node_id, base_node_id, pos) {
+    	if(!pos){return;}
+
+        var _this = this;
+        var target_node = this.nodes[node_id];
+        var base_node = this.nodes[base_node_id];
+        var SUCCESS = 'success';
+        var FAILED = 'failed';
+
+        function is_child(parent, node) {
+            var p = _this.getParent(node);
+            while (p) {
+                if (p === parent) {
+                    return true;
+                }
+                p = _this.getParent(p);
+            }
+            return false;
+        }
+
+        function set_parent(node, parent) {
+            node.parentId = parent ? parent.nodeId : undefined;
+        }
+
+        if (is_child(target_node, base_node)) {
+            console.log("Error: can't move to child");
+            return FAILED;
+        }
+
+        var target_parent = this.getParent(target_node);
+        var target_parent_nodes = target_parent ? target_parent.nodes : _this.tree;
+        target_parent_nodes.splice(target_parent_nodes.indexOf(target_node), 1);
+        if (target_parent_nodes.length === 0) {
+            target_parent.nodes = null;
+        }
+
+        var base_parent = this.getParent(base_node);
+        var base_parent_nodes = base_parent ? base_parent.nodes : _this.tree;
+
+        var idx = base_parent_nodes.indexOf(base_node);
+
+        if (pos === 'above') {
+            base_parent_nodes.splice(idx, 0, target_node);
+            set_parent(target_node, base_parent);
+        } else if (pos === 'below') {
+            base_parent_nodes.splice(idx + 1, 0, target_node);
+            set_parent(target_node, base_parent);
+        } else if (pos === 'child') {
+            //child
+            if (!base_node.nodes) {
+                base_node.nodes = [];
+            }
+            base_node.nodes.push(target_node);
+            set_parent(target_node, base_node);
+        }
+        this.render();
+        return SUCCESS;
+    };
+
+    Tree.prototype.setText = function (node_id, text) {
+        var target_node = this.nodes[node_id];
+        if (target_node) {
+            target_node.text = text;
+        }
+        this.render();
+    };
+
+    /**
+     * Add a new node
+     * @param new_node node object
+     * @param parent_id parent id of new node
+     */
+    Tree.prototype.addNode = function (new_node, parent_id) {
+        var new_nodes = [new_node];
+        if (parent_id !== undefined) {
+            var parent = this.nodes[parent_id];
+        }
+        this.setInitialStates({nodeId: parent_id, nodes: new_nodes}, 0);
+        if (parent) {
+            if (!parent.nodes) {
+                parent.nodes = new_nodes;
+            } else {
+                parent.nodes.push(new_node);
+            }
+        } else {
+            this.tree.push(new_node);
+        }
+        this.render();
+    };
+
+    /***
+	 * remove a node
+     * @param node_id
+     */
+    Tree.prototype.removeNode = function (node_id) {
+        var target_node = this.nodes[node_id];
+        if(!target_node || target_node.removed){return;}
+        this.unselectNode(node_id);
+
+        var parent_node = this.getParent(target_node);
+        var parent_nodes = parent_node ? parent_node.nodes : this.tree;
+        parent_nodes.splice(parent_nodes.indexOf(target_node), 1);
+        target_node.removed = true;
+        if (parent_node && parent_nodes.length === 0) {
+            parent_node.nodes = null;
+        }
+        this.render();
+    };
 
 	var logError = function (message) {
 		if (window.console) {

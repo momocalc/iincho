@@ -1,4 +1,4 @@
-{% macro make_category_tree(current_path=None) -%}
+{% macro make_category_tree(current_path=None, visibleCount=True) -%}
     [
 
     {% set current_path = current_path or ' ' %}
@@ -6,18 +6,19 @@
         {% set root = category_list | category_tree %}
 {# ルートは表示しない #}
         {%  for n in root.sorted_children %}
-            {{ make_tree_list(n, current_path) }}
+            {{ make_tree_list(n, current_path, visibleCount) }}
         {% endfor %}
     {%  endif %}
 
     ]
 {% endmacro %}
 
-{% macro make_tree_list(node, current_path) -%}
+{% macro make_tree_list(node, current_path, visibleCount) -%}
     {
         text: "{{ node.name }}",
         tags: ['{{ node.count }}'],
         href: "?path={{ node.encoded_path }}",
+        name: {% autoescape false %}{{ node.json_encoded_name }}{% endautoescape %},
         {% if current_path.startswith(node.path) %}
             state: {
                 expanded: true
@@ -29,7 +30,7 @@
     {% if node.children %}
         nodes: [
             {% for c in node.sorted_children %}
-                {{ make_tree_list(c, current_path) }}
+                {{ make_tree_list(c, current_path,visibleCount) }}
             {% endfor %}
         ],
     {% endif %}

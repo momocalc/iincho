@@ -1,5 +1,5 @@
 from typing import Optional, List
-
+import json
 from .models import Category
 import urllib.parse
 
@@ -31,6 +31,10 @@ class Node(object):
                 return self.name + '/'
             else:
                 return ''
+        if item == 'json_encoded_name':
+            return json.dumps(self.name, ensure_ascii=False)
+
+
 
     def __str__(self):
         if not self.children:

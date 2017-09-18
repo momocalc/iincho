@@ -1,0 +1,73 @@
+{% extends "base.jinja2" %}
+{% import "categories/macros.jinja2" as catecro with context %}
+{% import "ajax_macros.jinja2" as ajax_macro %}
+{#{% import "article_macros.jinja2" as articro with context %}#}
+
+{% block content %}
+
+    <div class="treeview-container">
+        <div id="treeview" class="treeview">
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_script %}
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <link href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css " rel="stylesheet">
+
+    <script src="{{ static('js/bootstrap-treeview.js') }}"></script>
+    <script src="{{ static("categories/treeview.js") }}"></script>
+
+    <script>
+        {{ ajax_macro.django_ajax_init() }}
+
+        function getData() {
+            var tree = {{ catecro.make_category_tree(None, False) }};
+            return tree;
+        }
+        var helper ;
+
+        $(function () {
+            helper = new TreeViewHelper($('#treeview'), getData());
+            helper.handler.onMovingNode = function (target_node, new_parent_node) {
+                var target_path = helper.getPath(target_node);
+                var new_parent_path = helper.getPath(new_parent_node);
+                return movePath(target_path, new_parent_path);
+            };
+        });
+
+        /**
+         * カテゴリの移動
+         * @param targetPath 移動するカテゴリパス
+         * @param newParentPath 移動先カテゴリパス
+         * @returns {boolean} 移動成功可否
+         */
+        function movePath(targetPath, newParentPath) {
+            var res = false;
+            $.ajax({
+                type: 'POST',
+                url: '{{ url('categories:move_category') }}',
+                data: {'target_path': targetPath, 'new_parent_path': newParentPath},
+                dataType: 'json',
+                timeout: 10000,
+                async: false // TODO:とりあえず非同期にしている。非同期で、サーバーレスポンスを得られるまで待機するようなしくみにできれば尚良。
+            }).done(function (data) {
+                console.log(data);
+                if (data['state'] === true) {
+                    res = true;
+                } else {
+                    alert(data['message']);
+                }
+            }).fail(function () {
+                console.log(arguments);
+                showErrorAndReload();
+            });
+            return res;
+        }
+
+        function showErrorAndReload() {
+            alert('エラーが発生したため、リロードします');
+            location.reload();
+        }
+    </script>
+{% endblock %}
