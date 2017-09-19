@@ -8,6 +8,7 @@ from categories import NOT_CATEGORISED
 from .models import Category
 from articles.models import Article
 from django.db.models import Count, Q
+from .validation import validation_name, validation_unique_path
 
 
 class CategoryListViewMixin(object):
@@ -20,12 +21,16 @@ class CategoryListViewMixin(object):
 
 
 class CategoryListUpdateView(LoginRequiredMixin, TemplateView, ProcessFormView):
+    """
+    カテゴリ管理画面View
+    formは、統合処理でのみ使用。 他はajaxで処理する。
+    """
+
     def get_context_data(self, **kwargs):
         context = super(CategoryListUpdateView, self).get_context_data(**kwargs)
         context['category_list'] = Category.objects.filter(
             ~Q(name__startswith='template/'), ~Q(name__startswith=NOT_CATEGORISED)) \
-            .annotate(num_articles=Count('article')
-                      ).order_by('name')
+            .annotate(num_articles=Count('article')).order_by('name')
         return context
 
     template_name = 'categories/category_edit.jinja2'
@@ -57,22 +62,16 @@ def move_category(request):
             'message': 'この移動はできません'
         })
 
-    new_name = new_parent + target[separate_idx + 1:]
-    # 同一ディレクトリが存在する場合は、移動を許さない
-    if Category.objects.filter(name__startswith=new_name):
-        return JsonResponse({
-            'state': False,
-            'message': '同じ名前のディレクトリが存在します'
-        })
-
-    # update
-    for obj in Category.objects.filter(name__startswith=target).all():
-        obj.name = obj.name.replace(target, new_name)
-        obj.save()
-
-    return JsonResponse({'state': True})
+    new_path = new_parent + target[separate_idx + 1:]
+    try:
+        validation_unique_path(new_path)
+        _update_path(target, new_path)
+        return JsonResponse({'state': True})
+    except AttributeError as e:
+        return JsonResponse({'state': False, 'message': str(e)})
 
 
+@require_POST
 def delete_category(request):
     """
     カテゴリ削除
@@ -90,3 +89,36 @@ def delete_category(request):
     Category.objects.filter(name__startswith=target).delete()
 
     return JsonResponse({'state': True})
+
+
+@require_POST
+def update_name(request):
+    """
+    名称変更
+    :param request:
+    :return:
+    """
+
+    target = request.POST.get('target_path')  # type:str
+    name = request.POST.get('name').strip()  # type:str
+
+    try:
+        validation_name(name)
+
+        separate_idx = target.rfind('/', 0, -1)
+        parent = '' if separate_idx < 0 else target[:separate_idx + 1]
+        new_path = parent + name + '/'
+
+        validation_unique_path(new_path)
+
+        _update_path(target, new_path)
+        return JsonResponse({'state': True})
+    except AttributeError as e:
+        return JsonResponse({'state': False, 'message': str(e)})
+
+
+def _update_path(target_path, new_path):
+    # update
+    for obj in Category.objects.filter(name__startswith=target_path).all():
+        obj.name = obj.name.replace(target_path, new_path)
+        obj.save()

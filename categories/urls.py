@@ -5,4 +5,5 @@ urlpatterns = [
     url(r'^list_update/$', CategoryListUpdateView.as_view(), name='list_update'),
     url(r'^move_category/$', 'categories.views.move_category', name='move_category'),
     url(r'^delete_category/$', 'categories.views.delete_category', name='delete_category'),
+    url(r'^update_name/$', 'categories.views.update_name', name='update_name'),
 ]
