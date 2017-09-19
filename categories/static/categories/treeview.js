@@ -18,7 +18,8 @@ var TreeViewHelper = function ($treeView, treeData) {
             return true;
         },
         onClickedDeleteNode: function () {
-
+        },
+        onClickedUpdateName: function () {
         }
     };
 
@@ -154,7 +155,7 @@ var TreeViewHelper = function ($treeView, treeData) {
     function addDropDownMenu(treeData) {
         var dropdownMenu = [
             {
-                key: 'editName',
+                key: 'updateName',
                 text: '名称変更',
                 action: clickedDropDownButton
             },
@@ -179,12 +180,20 @@ var TreeViewHelper = function ($treeView, treeData) {
     function clickedDropDownButton(e) {
         if (e.data.item_key === 'delete') {
             _this.handler.onClickedDeleteNode(e.data.node);
+        } else if (e.data.item_key === 'updateName') {
+            _this.handler.onClickedUpdateName(e.data.node);
         }
     }
 
     this.deleteNode = function (node) {
         var nodeId = node.nodeId;
         _this.treeview('removeNode', nodeId);
+    }
+
+    this.updateNodeName = function(node, name){
+        var nodeId = node.nodeId;
+        node.name = name;
+        _this.treeview('setText',[nodeId, name] );
     }
 
 };

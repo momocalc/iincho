@@ -57,22 +57,13 @@ def move_category(request):
             'message': 'この移動はできません'
         })
 
-    new_name = new_parent + target[separate_idx + 1:]
-    # 同一ディレクトリが存在する場合は、移動を許さない
-    if Category.objects.filter(name__startswith=new_name):
-        return JsonResponse({
-            'state': False,
-            'message': '同じ名前のディレクトリが存在します'
-        })
+    new_path = new_parent + target[separate_idx + 1:]
+    upd_res, msg = _update_path(target, new_path)
 
-    # update
-    for obj in Category.objects.filter(name__startswith=target).all():
-        obj.name = obj.name.replace(target, new_name)
-        obj.save()
-
-    return JsonResponse({'state': True})
+    return JsonResponse({'state': upd_res, 'message': msg})
 
 
+@require_POST
 def delete_category(request):
     """
     カテゴリ削除
@@ -90,3 +81,54 @@ def delete_category(request):
     Category.objects.filter(name__startswith=target).delete()
 
     return JsonResponse({'state': True})
+
+
+@require_POST
+def update_name(request):
+    """
+    名称変更
+    :param request:
+    :return:
+    """
+
+    target = request.POST.get('target_path')  # type:str
+    name = request.POST.get('name').strip()  # type:str
+
+    is_valid, msg = _is_valid_name(name)
+    if not is_valid:
+        return JsonResponse({
+            'state': False,
+            'message': msg
+        })
+
+    separate_idx = target.rfind('/', 0, -1)
+    parent = '' if separate_idx < 0 else target[:separate_idx + 1]
+
+    new_path = parent + name + '/'
+    upd_res, msg = _update_path(target, new_path)
+
+    return JsonResponse({'state': upd_res, 'message': msg})
+
+
+def _is_valid_name(name):
+    if not name:
+        return False, 'カテゴリ名を入力してください'
+    if name.find('/') >= 0:
+        return False, 'カテゴリ名に「/」は使用できません'
+    if name == NOT_CATEGORISED[:-1]:
+        return False, 'この名称はカテゴリ名に使用できません'
+
+    return True, None
+
+
+def _update_path(target_path, new_path):
+    # 同一ディレクトリが存在する場合は、移動を許さない
+    if Category.objects.filter(name__startswith=new_path):
+        return False, '同じ名前のディレクトリが存在します'
+
+    # update
+    for obj in Category.objects.filter(name__startswith=target_path).all():
+        obj.name = obj.name.replace(target_path, new_path)
+        obj.save()
+
+    return True, None
