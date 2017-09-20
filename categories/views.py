@@ -175,5 +175,3 @@ def _update_path(target_path, new_path):
     for obj in Category.objects.filter(name__startswith=target_path).all():
         obj.name = obj.name.replace(target_path, new_path)
         obj.save()
-
-    return True, None

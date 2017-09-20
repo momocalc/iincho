@@ -227,12 +227,5 @@ var TreeViewHelper = function ($treeView, treeData) {
         addDropDownMenu(node);
         _this.treeview('addNode', [node, parentNode.nodeId]);
         _this.treeview('expandNode', parentNode.nodeId);
-    }
-
-    this.updateNodeName = function(node, name){
-        var nodeId = node.nodeId;
-        node.name = name;
-        _this.treeview('setText',[nodeId, name] );
-    }
-
+    };
 };
