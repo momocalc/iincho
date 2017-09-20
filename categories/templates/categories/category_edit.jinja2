@@ -53,7 +53,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label></label>
-                        <input type="text" name="category-name" class="form-control" />
+                        <input type="text" name="category-name" class="form-control"/>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -81,7 +81,7 @@
 
         // 削除モーダル 設定
         var deleteConfirm = $('#delete-confirm');
-        deleteConfirm.find('.modal-message').html('このカテゴリ配下の記事は、すべて「カテゴリなし」の状態になります。(記事自体は削除されません)<br />カテゴリを削除しますか？');
+        deleteConfirm.find('.modal-message').html('このカテゴリ配下(子カテゴリ含む)の記事は、すべて「カテゴリなし」の状態になります。(記事自体は削除されません)<br />カテゴリを削除しますか？');
         deleteConfirm.find('.modal-submit').click(deleteCategory);
 
         /**
@@ -98,7 +98,7 @@
             inputNameModal.find('.modal-title').text(title);
             inputNameModal.find('.modal-body label').text(label);
             inputNameModal.find('input').val('');
-            inputNameModal.find('button.btn-success').text(buttonText).on('click', action);
+            inputNameModal.find('button.btn-success').text(buttonText).unbind('click').click(action);
 
             inputNameModal.modal('show');
             return inputNameModal;
@@ -125,8 +125,7 @@
 
             treeHelper.handler.onClickedAddChild = function (node) {
                 editNode = node;
-                //モーダル表示
-                deleteConfirm.modal('show');
+                initInputNameModal('カテゴリ追加', '新規カテゴリ名', '追加', addCategory);
             }
         });
 

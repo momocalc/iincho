@@ -23,6 +23,32 @@ var TreeViewHelper = function ($treeView, treeData) {
         }
     };
 
+    var addChildMenuItem = {
+        key: 'addChild',
+        text: '子カテゴリ追加',
+        action: clickedDropDownButton
+    };
+    var dropdownMenuItems = [
+        {
+            key: 'updateName',
+            text: '名称変更',
+            action: clickedDropDownButton
+        }, addChildMenuItem,
+        "divider",
+        {
+            key: 'delete',
+            text: '削除',
+            action: clickedDropDownButton
+        }
+    ];
+
+    function addDropDownMenu(node) {
+        node.dropdown = jQuery.extend(true, {}, dropdownMenuItems);
+        if (node.hasOwnProperty('nodes')) {
+            node.nodes.forEach(addDropDownMenu);
+        }
+    }
+
     /**
      * wrap treeview
      * @returns {*}
@@ -48,10 +74,21 @@ var TreeViewHelper = function ($treeView, treeData) {
     function build() {
         var isSuccessDropped; // ドロップでの移動成功フラグ
 
-        addDropDownMenu(treeData); // ドロップダウンメニューの追加
+        // ドロップダウンメニューの追加
+        treeData.forEach(addDropDownMenu);
+        /**
+         * ノードデータをラッピング
+         * トップ(根)には"root"を表示する
+         */
+        var tree = {
+            text: "root",
+            name: "",
+            nodes: treeData,
+            dropdown: [addChildMenuItem] // rootは子追加のメニューアイテムのみ表示
+        };
 
         $treeView.treeview({
-                data: [{text: "root", name: "", nodes: treeData}],
+                data: [tree],
                 levels: 3,
                 highlightSelected: false,
                 showCheckbox: true,
@@ -157,31 +194,6 @@ var TreeViewHelper = function ($treeView, treeData) {
 
     build();
 
-    function addDropDownMenu(treeData) {
-        var dropdownMenu = [
-            {
-                key: 'updateName',
-                text: '名称変更',
-                action: clickedDropDownButton
-            },
-            "divider",
-            {
-                key: 'delete',
-                text: '削除',
-                action: clickedDropDownButton
-            }
-        ];
-
-        function _addMenu(node) {
-            node.dropdown = jQuery.extend(true, {}, dropdownMenu);
-            if (node.hasOwnProperty('nodes')) {
-                node.nodes.forEach(_addMenu);
-            }
-        }
-
-        treeData.forEach(_addMenu);
-    }
-
     function clickedDropDownButton(e) {
         if (e.data.item_key === 'delete') {
             _this.handler.onClickedDeleteNode(e.data.node);
@@ -193,12 +205,24 @@ var TreeViewHelper = function ($treeView, treeData) {
     this.deleteNode = function (node) {
         var nodeId = node.nodeId;
         _this.treeview('removeNode', nodeId);
-    }
+    };
 
     this.updateNodeName = function (node, name) {
         var nodeId = node.nodeId;
         node.name = name;
-        _this.treeview('setText', [nodeId, name]);
+        var escapedName = $('<span/>').text(name).html();
+        _this.treeview('setText', [nodeId, escapedName]);
+    };
+
+    this.addNode = function (parentNode, name) {
+        var escapedName = $('<span/>').text(name).html();
+        var node = {
+            text: escapedName,
+            name: name
+        };
+        addDropDownMenu(node);
+        _this.treeview('addNode', [node, parentNode.nodeId]);
+        _this.treeview('expandNode', parentNode.nodeId);
     }
 
 };
