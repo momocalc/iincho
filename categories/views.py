@@ -1,4 +1,4 @@
-from braces.views import LoginRequiredMixin
+from braces.views import StaffuserRequiredMixin
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import ProcessFormView
 from django.views.decorators.http import require_POST
@@ -20,7 +20,7 @@ class CategoryListViewMixin(object):
         return context
 
 
-class CategoryListUpdateView(LoginRequiredMixin, TemplateView, ProcessFormView):
+class CategoryListUpdateView(StaffuserRequiredMixin, TemplateView, ProcessFormView):
     """
     カテゴリ管理画面View
     formは、統合処理でのみ使用。 他はajaxで処理する。
