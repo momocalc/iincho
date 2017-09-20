@@ -229,4 +229,10 @@ var TreeViewHelper = function ($treeView, treeData) {
         _this.treeview('expandNode', parentNode.nodeId);
     }
 
+    this.updateNodeName = function(node, name){
+        var nodeId = node.nodeId;
+        node.name = name;
+        _this.treeview('setText',[nodeId, name] );
+    }
+
 };
