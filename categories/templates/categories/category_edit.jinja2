@@ -256,6 +256,33 @@
                 showErrorAndReload();
             });
         }
+        /**
+         * カテゴリの追加
+         */
+        function addCategory() {
+            var paths = [];
+            var name = inputNameModal.find('input').val();
+            var parent = treeHelper.getPath(editNode);
+            $.ajax({
+                type: 'POST',
+                url: '{{ url('categories:add_category') }}',
+                data: {'parent': parent, 'name': name},
+                dataType: 'json',
+                timeout: 10000,
+                async: false
+            }).done(function (data) {
+                console.log(data);
+                if (data['state'] === true) {
+                    treeHelper.addNode(editNode, name);
+                    inputNameModal.modal('hide');
+                } else {
+                    inputNameModal.find('.alert').show().text(data['message']);
+                }
+            }).fail(function () {
+                console.log(arguments);
+                //showErrorAndReload();
+            });
+        }
 
         function showErrorAndReload() {
             alert('エラーが発生したため、リロードします');

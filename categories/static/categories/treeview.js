@@ -20,6 +20,8 @@ var TreeViewHelper = function ($treeView, treeData) {
         onClickedDeleteNode: function () {
         },
         onClickedUpdateName: function () {
+        },
+        onClickedAddChild: function () {
         }
     };
 
@@ -199,6 +201,8 @@ var TreeViewHelper = function ($treeView, treeData) {
             _this.handler.onClickedDeleteNode(e.data.node);
         } else if (e.data.item_key === 'updateName') {
             _this.handler.onClickedUpdateName(e.data.node);
+        } else if (e.data.item_key === 'addChild') {
+            _this.handler.onClickedAddChild(e.data.node);
         }
     }
 

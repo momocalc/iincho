@@ -148,6 +148,28 @@ def merge_categories(request):
     return JsonResponse({'state': True})
 
 
+@require_POST
+def add_category(request):
+    """
+    カテゴリ追加
+    :param request:
+    :return:
+    """
+
+    parent = request.POST.get('parent')  # type:str
+    name = request.POST.get('name').strip()  # type:str
+
+    try:
+        validation_name(name)
+        new_path = parent + name + '/'
+        validation_unique_path(new_path)
+        Category.objects.create(name=new_path)
+
+        return JsonResponse({'state': True})
+    except AttributeError as e:
+        return JsonResponse({'state': False, 'message': str(e)})
+
+
 def _update_path(target_path, new_path):
     # update
     for obj in Category.objects.filter(name__startswith=target_path).all():
