@@ -117,6 +117,37 @@ def update_name(request):
         return JsonResponse({'state': False, 'message': str(e)})
 
 
+@require_POST
+def merge_categories(request):
+    """
+    カテゴリの統合
+    統合後のカテゴリはルート直下に配置し、統合前のカテゴリは削除する
+    :param request:
+    :return:
+    """
+
+    target_paths = request.POST.getlist('target_paths[]')
+    name = request.POST.get('name')
+
+    try:
+        new_category_path = name + '/'
+        validation_name(name)
+        validation_unique_path(new_category_path)
+
+        new_category = Category.objects.create(name=new_category_path)
+        for path in target_paths:
+            category = Category.objects.filter(name__exact=path)
+            if category:
+                articles = Article.objects.filter(category=category)
+                articles.update(category=new_category)
+                category.delete()
+
+    except AttributeError as e:
+        return JsonResponse({'state': False, 'message': str(e)})
+
+    return JsonResponse({'state': True})
+
+
 def _update_path(target_path, new_path):
     # update
     for obj in Category.objects.filter(name__startswith=target_path).all():

@@ -53,6 +53,8 @@ var TreeViewHelper = function ($treeView, treeData) {
         $treeView.treeview({
                 data: [{text: "root", name: "", nodes: treeData}],
                 levels: 3,
+                highlightSelected: false,
+                showCheckbox: true,
                 onTreeRendered: function () {
                     var $draggableNode;
                     var nodeHeight = 40;
@@ -145,6 +147,9 @@ var TreeViewHelper = function ($treeView, treeData) {
                             }
                         }
                     });
+
+                    // rootのcheckboxは表示しない
+                    $treeView.find('.check-icon:first').hide();
                 }
             }
         );
@@ -190,10 +195,10 @@ var TreeViewHelper = function ($treeView, treeData) {
         _this.treeview('removeNode', nodeId);
     }
 
-    this.updateNodeName = function(node, name){
+    this.updateNodeName = function (node, name) {
         var nodeId = node.nodeId;
         node.name = name;
-        _this.treeview('setText',[nodeId, name] );
+        _this.treeview('setText', [nodeId, name]);
     }
 
 };

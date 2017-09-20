@@ -3,10 +3,62 @@
 {% import "ajax_macros.jinja2" as ajax_macro %}
 {% import "basic_macros.jinja2" as b_macro with context %}
 
+{% macro input_modal(modal_id, title,label, button_text, action) -%}
+    <div class="modal fade" tabindex="-1" role="dialog" id="{{ modal_id }}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">{{ title }}</h4>
+                </div>
+                <div class="alert alert-danger" role="alert">
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>{{ label }}</label>
+                        <input type="text" name="category-name" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="{{ action }}()">{{ button_text }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% block head %}
+    <style>
+        .container {
+            width: auto;
+        }
+    </style>
+{% endblock %}
 {% block content %}
 
-    <div class="treeview-container">
-        <div id="treeview" class="treeview">
+    <h1>カテゴリ管理</h1>
+    <div class="row">
+        <div class="col-lg-8 treeview-container">
+            <div id="treeview" class="treeview">
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <h2>カテゴリ統合</h2>
+            <div>
+                <p>統合するカテゴリにチェックをつけて統合ボタンをクリックしてください。</p>
+            </div>
+            <div class="alert alert-info">
+                <ul>
+                    <li>チェックしたカテゴリの子カテゴリの統合はされません。
+                        チェックしたカテゴリ直下の記事だけが、統合カテゴリに移動します。
+                    </li>
+                    <li>統合カテゴリはroot直下に作成されます。</li>
+                </ul>
+            </div>
+            <button type="button" class="btn btn-success" onclick="showMergeModal()">統合</button>
         </div>
     </div>
 
@@ -14,31 +66,10 @@
     {{ b_macro.confirm_modal(modal_id='delete_confirm', btn_class="btn-danger") }}
 
     {# 名称変更モーダル #}
-    <div class="modal fade" tabindex="-1" role="dialog" id="update-name-modal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">名称変更</h4>
-                </div>
-                <div class="alert alert-danger" role="alert">
-                </div>
+    {{ input_modal('update-name-modal', '名称変更', 'カテゴリ名', '更新', 'updateName') }}
 
-
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>カテゴリ名</label>
-                        <input type="text" name="category-name" class="form-control">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success" onclick="updateName();">更新</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+    {# 統合モーダル #}
+    {{ input_modal('merge-modal', '統合', '統合カテゴリ名', '統合', 'mergeCategory') }}
 
 {% endblock %}
 
@@ -60,10 +91,16 @@
         deleteConfirm.find('.modal-message').html('このカテゴリ配下の記事は、すべて「カテゴリなし」の状態になります。(記事自体は削除されません)<br />カテゴリを削除しますか？');
         deleteConfirm.find('.modal-submit').click(deleteCategory);
 
-        // updateConfirm
+        // updateNameModal
         var updateNameModal = $('#update-name-modal');
         updateNameModal.on('shown.bs.modal', function () {
             updateNameModal.find('input').focus();
+        });
+
+        // mergeModal
+        var mergeModal = $('#merge-modal');
+        mergeModal.on('shown.bs.modal', function () {
+            mergeModal.find('input').focus();
         });
 
         $(function () {
@@ -163,6 +200,51 @@
                 } else {
                     updateNameModal.find('.alert').show().text(data['message']);
 
+                }
+            }).fail(function () {
+                console.log(arguments);
+                showErrorAndReload();
+            });
+        }
+
+        /**
+         * 統合モーダル表示
+         */
+        function showMergeModal() {
+
+            if (treeHelper.treeview("getChecked").length <= 1) {
+                alert('複数のカテゴリにチェックをしてください');
+                return false;
+            }
+            mergeModal.find('.alert').hide();
+            mergeModal.modal('show');
+        }
+        /**
+         * カテゴリの統合処理
+         */
+        function mergeCategory() {
+            var paths = [];
+            var name = mergeModal.find('input').val();
+
+            treeHelper.treeview("getChecked").forEach(function (v) {
+                paths.push(treeHelper.getPath(v));
+            });
+            console.log(paths);
+
+            $.ajax({
+                type: 'POST',
+                url: '{{ url('categories:merge_categories') }}',
+                data: {'target_paths[]': paths, 'name': name},
+                dataType: 'json',
+                timeout: 10000,
+                async: false
+            }).done(function (data) {
+                console.log(data);
+                if (data['state'] === true) {
+                    mergeModal.modal('hide');
+                    location.reload();
+                } else {
+                    mergeModal.find('.alert').show().text(data['message']);
                 }
             }).fail(function () {
                 console.log(arguments);

@@ -6,4 +6,5 @@ urlpatterns = [
     url(r'^move_category/$', 'categories.views.move_category', name='move_category'),
     url(r'^delete_category/$', 'categories.views.delete_category', name='delete_category'),
     url(r'^update_name/$', 'categories.views.update_name', name='update_name'),
+    url(r'^merge_categories/$', 'categories.views.merge_categories', name='merge_categories'),
 ]
